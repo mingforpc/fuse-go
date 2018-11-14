@@ -11,6 +11,8 @@ import (
 	"strings"
 	"syscall"
 	"unsafe"
+
+	"github.com/mingforpc/fuse-go/fuse"
 )
 
 func unixgramSocketpair() (l, r *os.File, err error) {
@@ -26,7 +28,7 @@ func unixgramSocketpair() (l, r *os.File, err error) {
 
 // Create a FUSE FS on the specified mount point.  The returned
 // mount point is always absolute.
-func Mount(mountPoint string) (fd int, err error) {
+func Mount(se *fuse.FuseSession) (err error) {
 	local, remote, err := unixgramSocketpair()
 	if err != nil {
 		return
@@ -37,10 +39,10 @@ func Mount(mountPoint string) (fd int, err error) {
 
 	bin, err := fusermountBinary()
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	cmd := []string{bin, mountPoint}
+	cmd := []string{bin, se.Mountpoint}
 	opts := []string{"rw", "nosuid", "nodev"}
 	cmd = append(cmd, "-o", strings.Join(opts, ","))
 
@@ -63,17 +65,20 @@ func Mount(mountPoint string) (fd int, err error) {
 		return
 	}
 
+	var fd int
 	fd, err = getConnection(local)
 	if err != nil {
-		return -1, err
+		return err
 	}
+
+	se.Dev = os.NewFile(uintptr(fd), "/dev/fuse")
 
 	// golang sets CLOEXEC on file descriptors when they are
 	// acquired through normal operations (e.g. open).
 	// Buf for fd, we have to set CLOEXEC manually
 	syscall.CloseOnExec(fd)
 
-	return fd, err
+	return err
 }
 
 func getConnection(local *os.File) (int, error) {
