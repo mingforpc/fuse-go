@@ -2,6 +2,7 @@ package fuse
 
 import (
 	"os"
+	"sync"
 	"syscall"
 	"time"
 
@@ -64,6 +65,13 @@ type FuseSession struct {
 	Opts *FuseOpt
 
 	Debug bool
+
+	Running bool
+
+	readChan  chan []byte
+	writeChan chan []byte
+
+	wait sync.WaitGroup
 }
 
 func (se *FuseSession) Init(mountpoint string, opts *FuseOpt) {

@@ -4,33 +4,80 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/mingforpc/fuse-go/fuse/common"
 	"github.com/mingforpc/fuse-go/fuse/errno"
 	"github.com/mingforpc/fuse-go/fuse/kernel"
 	"github.com/mingforpc/fuse-go/fuse/log"
 )
 
 // The loop to read/write '/dev/fuse'
-func FuseLoop(se *FuseSession) {
+func (se *FuseSession) FuseLoop() {
 
-	respChannel := make(chan []byte, 1024)
+	se.Running = true
 
+	se.readChan = make(chan []byte, 1024)
+	se.writeChan = make(chan []byte, 1024)
+
+	// Write goroutine
+	// 用来写"/dev/fuse"的goroutine
 	go func() {
+
 		for true {
 
-			res := <-respChannel
-			err := writeCmd(se, res)
+			res, ok := <-se.writeChan
 
-			if err != nil {
-				log.Error.Println(err)
+			if !ok {
+				break
 			}
+
+			if se.Running {
+				err := se.writeCmd(res)
+				if err != nil {
+					log.Error.Println(err)
+				}
+			}
+
+		}
+
+	}()
+
+	// Read goroutine
+	// 用来读取"/dev/fuse"的goroutine
+	go func() {
+
+		defer func() {
+			if err := recover(); err != nil {
+				fmt.Printf("Read goroutine error[%s] \n", err)
+			}
+		}()
+
+		for se.Running {
+
+			breq, err := se.readCmd()
+			if err != nil {
+
+				fmt.Println(err)
+				break
+			}
+
+			// Read 可能block很久，所以再判断一次
+			if se.Running {
+				se.readChan <- breq
+			}
+
 		}
 
 	}()
 
 	for true {
 
-		inheader, buf, err := readCmd(se)
+		brep, ok := <-se.readChan
+
+		if !ok {
+
+			break
+		}
+
+		inheader, buf, err := se.parseHeader(brep)
 
 		if err != nil {
 
@@ -39,9 +86,21 @@ func FuseLoop(se *FuseSession) {
 		}
 
 		req := FuseReq{}
-		req.Init(se, *inheader)
+		req.Init(se, inheader)
 
+		// 用来处理各个请求的goroutine
 		go func() {
+
+			se.wait.Add(1)
+
+			defer func() {
+				if err := recover(); err != nil {
+					fmt.Printf("Distribute goroutine error[%s] \n", err)
+				}
+
+				se.wait.Done()
+			}()
+
 			res, err := distribute(&req, inheader, buf)
 
 			if err == kernel.NoNeedReplyErr {
@@ -52,7 +111,7 @@ func FuseLoop(se *FuseSession) {
 			if err != nil {
 				log.Error.Println(err)
 			} else {
-				respChannel <- res
+				se.writeChan <- res
 			}
 		}()
 
@@ -60,35 +119,49 @@ func FuseLoop(se *FuseSession) {
 
 }
 
+func (se *FuseSession) Close() {
+	se.Running = false
+
+	se.wait.Wait()
+
+	close(se.readChan)
+	close(se.writeChan)
+	se.Dev.Close()
+}
+
 // Read event from '/dev/fuse'
-func readCmd(se *FuseSession) (*kernel.FuseInHeader, []byte, error) {
+func (se *FuseSession) readCmd() ([]byte, error) {
 	var cmdLenBytes = make([]byte, se.Bufsize)
 
 	n, err := se.Dev.Read(cmdLenBytes)
 	if err != nil {
 		fmt.Println(err)
-		return nil, nil, err
+		return nil, err
 	}
 
 	cmdLenBytes = cmdLenBytes[0:n]
 
+	return cmdLenBytes, err
+}
+
+func (se *FuseSession) parseHeader(bcontent []byte) (kernel.FuseInHeader, []byte, error) {
 	var inheader = kernel.FuseInHeader{}
 
-	headerbytes := cmdLenBytes[:40]
-	opsbytes := cmdLenBytes[40:]
+	headerbytes := bcontent[:40]
+	opsbytes := bcontent[40:]
 
-	err = inheader.ParseBinary(headerbytes)
+	err := inheader.ParseBinary(headerbytes)
 
 	if se.Debug {
-		log.Trace.Printf("cmdLenBytes[%+v]", cmdLenBytes)
+		log.Trace.Printf("cmdLenBytes[%+v]", bcontent)
 		log.Trace.Printf("inheader: %+v, content[%+v]", inheader, opsbytes)
 	}
 
-	return &inheader, opsbytes, err
+	return inheader, opsbytes, err
 }
 
 // Write response to '/dev/fuse'
-func writeCmd(se *FuseSession, resp []byte) error {
+func (se *FuseSession) writeCmd(resp []byte) error {
 	if se.Debug {
 		log.Trace.Printf("resp[%+v] \n", resp)
 	}
@@ -98,7 +171,7 @@ func writeCmd(se *FuseSession, resp []byte) error {
 }
 
 // Distribute event to earch function
-func distribute(req *FuseReq, inHeader *kernel.FuseInHeader, bcontent []byte) ([]byte, error) {
+func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]byte, error) {
 
 	var arg interface{}
 	var errnum int32
@@ -612,15 +685,6 @@ func distribute(req *FuseReq, inHeader *kernel.FuseInHeader, bcontent []byte) ([
 	}
 
 	return bresp, err
-}
-
-// Parse opcode from bytes
-func parseOpcode(bdata []byte) (uint32, error) {
-	var opcode uint32
-
-	err := common.ParseBinary(bdata, &opcode)
-
-	return opcode, err
 }
 
 // Function to generate bytes response

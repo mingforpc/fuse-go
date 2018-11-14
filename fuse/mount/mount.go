@@ -115,6 +115,7 @@ func lookPathFallback(file string, fallbackDir string) (string, error) {
 	return exec.LookPath(abs)
 }
 
+// 需要先把"/dev/fuse"文件关闭
 func Unmount(mountPoint string) (err error) {
 	bin, err := fusermountBinary()
 	if err != nil {
