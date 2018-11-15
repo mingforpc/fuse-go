@@ -183,7 +183,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_INIT:
 		// Init event
 		var initIn = kernel.FuseInitIn{}
-		// common.ParseBinary(bcontent, &initIn)
 		initIn.ParseBinary(bcontent)
 		arg = initIn
 		req.Arg = &arg
@@ -196,7 +195,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_FORGET:
 		// Forget event
 		var fotgetIn = kernel.FuseForgetIn{}
-		// common.ParseBinary(bcontent, &fotgetIn)
 		fotgetIn.ParseBinary(bcontent)
 		arg = fotgetIn
 		req.Arg = &arg
@@ -208,7 +206,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_LOOKUP:
 		// lookup event
 		var lookupIn = kernel.FuseLookupIn{}
-		// common.ParseBinary(bcontent, &lookupIn)
 		lookupIn.ParseBinary(bcontent)
 		arg = lookupIn
 		req.Arg = &arg
@@ -222,7 +219,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_GETATTR:
 		// Getattr event
 		var getattrIn = kernel.FuseGetattrIn{}
-		// common.ParseBinary(bcontent, &getattrIn)
 		getattrIn.ParseBinary(bcontent)
 		arg = getattrIn
 		req.Arg = &arg
@@ -235,7 +231,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_SETATTR:
 		// Setattr event
 		var setattrIn = kernel.FuseSetattrIn{}
-		// common.ParseBinary(bcontent, &setattrIn)
 		setattrIn.ParseBinary(bcontent)
 		arg = setattrIn
 		req.Arg = &arg
@@ -255,7 +250,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_MKNOD:
 		// Mknod event
 		var mknodIn = kernel.FuseMknodIn{}
-		// common.ParseBinary(bcontent, &mknodIn)
 		mknodIn.ParseBinary(bcontent)
 		arg = mknodIn
 		req.Arg = &arg
@@ -269,7 +263,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_MKDIR:
 		// Mkdir event
 		var mkdirIn = kernel.FuseMkdirIn{}
-		// common.ParseBinary(bcontent, &mkdirIn)
 		mkdirIn.ParseBinary(bcontent)
 		arg = mkdirIn
 		req.Arg = &arg
@@ -283,7 +276,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_UNLINK:
 		// Unlink event
 		var unlinkIn = kernel.FuseUnlinkIn{}
-		// common.ParseBinary(bcontent, &unlinkIn)
 		unlinkIn.ParseBinary(bcontent)
 		arg = unlinkIn
 		req.Arg = &arg
@@ -293,7 +285,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_RMDIR:
 		// Rmdir event
 		var rmdirIn = kernel.FuseRmdirIn{}
-		// common.ParseBinary(bcontent, &rmdirIn)
 		rmdirIn.ParseBinary(bcontent)
 		arg = rmdirIn
 		req.Arg = &arg
@@ -302,7 +293,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_SYMLINK:
 		// Symlink event
 		var symlinkIn = kernel.FuseSymlinkIn{}
-		// common.ParseBinary(bcontent, &symlinkIn)
 		symlinkIn.ParseBinary(bcontent)
 		arg = symlinkIn
 		req.Arg = &arg
@@ -316,7 +306,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_RENAME:
 		// Rename event
 		var renameIn = kernel.FuseRenameIn{}
-		// common.ParseBinary(bcontent, &renameIn)
 		renameIn.ParseBinary(bcontent)
 		arg = renameIn
 		req.Arg = &arg
@@ -326,7 +315,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_RENAME2:
 		// Rename2 event
 		var renameIn = kernel.FuseRename2In{}
-		// common.ParseBinary(bcontent, &renameIn)
 		renameIn.ParseBinary(bcontent)
 		arg = renameIn
 		req.Arg = &arg
@@ -335,7 +323,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_LINK:
 		// Link event
 		var linkIn = kernel.FuseLinkIn{}
-		// common.ParseBinary(bcontent, &linkIn)
 		linkIn.ParseBinary(bcontent)
 		arg = linkIn
 		req.Arg = &arg
@@ -349,7 +336,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_OPEN:
 		// Open event
 		var openIn = kernel.FuseOpenIn{}
-		// common.ParseBinary(bcontent, &openIn)
 		openIn.ParseBinary(bcontent)
 		arg = openIn
 		req.Arg = &arg
@@ -362,7 +348,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_READ:
 		// Read event
 		var readIn = kernel.FuseReadIn{}
-		// common.ParseBinary(bcontent, &readIn)
 		readIn.ParseBinary(bcontent)
 		arg = readIn
 		req.Arg = &arg
@@ -376,7 +361,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_WRITE:
 		// Write event
 		var writeIn = kernel.FuseWriteIn{}
-		// common.ParseBinary(bcontent, &writeIn)
 		writeIn.ParseBinary(bcontent)
 		arg = writeIn
 		req.Arg = &arg
@@ -390,7 +374,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_FSYNC:
 		// Fsync event
 		var fsyncIn = kernel.FuseFsyncIn{}
-		// common.ParseBinary(bcontent, &fsyncIn)
 		fsyncIn.ParseBinary(bcontent)
 		arg = fsyncIn
 		req.Arg = &arg
@@ -400,7 +383,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_OPENDIR:
 		// Opendir event
 		var openIn = kernel.FuseOpenIn{}
-		// common.ParseBinary(bcontent, &openIn)
 		openIn.ParseBinary(bcontent)
 		arg = openIn
 		req.Arg = &arg
@@ -414,7 +396,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_READDIR:
 		// Readdir event
 		var readIn = kernel.FuseReadIn{}
-		// common.ParseBinary(bcontent, &readIn)
 		readIn.ParseBinary(bcontent)
 		arg = readIn
 		req.Arg = &arg
@@ -428,7 +409,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_RELEASEDIR:
 		// Releasedir event
 		var releasedirIn = kernel.FuseReleaseIn{}
-		// common.ParseBinary(bcontent, &releasedirIn)
 		releasedirIn.ParseBinary(bcontent)
 		arg = releasedirIn
 		req.Arg = &arg
@@ -438,7 +418,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	case kernel.FUSE_FSYNCDIR:
 		// Fsyncdir event
 		var fsyncdirIn = kernel.FuseFsyncIn{}
-		// common.ParseBinary(bcontent, &fsyncdirIn)
 		fsyncdirIn.ParseBinary(bcontent)
 		arg = fsyncdirIn
 		req.Arg = &arg
@@ -458,7 +437,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Setxattr event
 
 		var setxattrIn = kernel.FuseSetxattrIn{}
-		// common.ParseBinary(bcontent, &setxattrIn)
 		setxattrIn.ParseBinary(bcontent)
 		arg = setxattrIn
 		req.Arg = &arg
@@ -469,7 +447,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Getxattr event
 
 		var getxattrIn = kernel.FuseGetxattrIn{}
-		// common.ParseBinary(bcontent, &getxattrIn)
 		getxattrIn.ParseBinary(bcontent)
 		arg = getxattrIn
 		req.Arg = &arg
@@ -487,7 +464,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Listxattr event
 
 		var listxattrIn = kernel.FuseGetxattrIn{}
-		// common.ParseBinary(bcontent, &listxattrIn)
 		listxattrIn.ParseBinary(bcontent)
 		arg = listxattrIn
 		req.Arg = &arg
@@ -505,7 +481,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Removexattr event
 
 		var removexattrIn = kernel.FuseRemovexattrIn{}
-		// common.ParseBinary(bcontent, &removexattrIn)
 		removexattrIn.ParseBinary(bcontent)
 		arg = removexattrIn
 		req.Arg = &arg
@@ -516,7 +491,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Access event
 
 		var accessIn = kernel.FuseAccessIn{}
-		// common.ParseBinary(bcontent, &accessIn)
 		accessIn.ParseBinary(bcontent)
 		arg = accessIn
 		req.Arg = &arg
@@ -527,7 +501,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Create event
 
 		var createIn = kernel.FuseCreateIn{}
-		// common.ParseBinary(bcontent, &createIn)
 		createIn.ParseBinary(bcontent)
 		arg = createIn
 		req.Arg = &arg
@@ -542,7 +515,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Getlk event
 
 		var getlkIn = kernel.FuseLkIn{}
-		// common.ParseBinary(bcontent, &getlkIn)
 		getlkIn.ParseBinary(bcontent)
 		arg = getlkIn
 		req.Arg = &arg
@@ -557,7 +529,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Setlk event
 
 		var setlkIn = kernel.FuseLkIn{}
-		// common.ParseBinary(bcontent, &setlkIn)
 		setlkIn.ParseBinary(bcontent)
 		arg = setlkIn
 		req.Arg = &arg
@@ -568,7 +539,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Getlkw event
 
 		var getlkIn = kernel.FuseLkIn{}
-		// common.ParseBinary(bcontent, &getlkIn)
 		getlkIn.ParseBinary(bcontent)
 		arg = getlkIn
 		req.Arg = &arg
@@ -578,7 +548,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Bmap event
 
 		var bmapIn = kernel.FuseBmapIn{}
-		// common.ParseBinary(bcontent, &bmapIn)
 		bmapIn.ParseBinary(bcontent)
 		arg = bmapIn
 		req.Arg = &arg
@@ -593,7 +562,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Ioctl event
 
 		var ioctlIn = kernel.FuseIoctlIn{}
-		// common.ParseBinary(bcontent, ioctlIn)
 		ioctlIn.ParseBinary(bcontent)
 		arg = ioctlIn
 		req.Arg = &arg
@@ -608,7 +576,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Poll event
 
 		var pollIn = kernel.FusePollIn{}
-		// common.ParseBinary(bcontent, pollIn)
 		pollIn.ParseBinary(bcontent)
 		arg = pollIn
 		req.Arg = &arg
@@ -623,7 +590,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Fallocate event
 
 		var fallocateIn = kernel.FuseFallocateIn{}
-		// common.ParseBinary(bcontent, fallocateIn)
 		fallocateIn.ParseBinary(bcontent)
 		arg = fallocateIn
 		req.Arg = &arg
@@ -634,7 +600,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// Batch forget event
 
 		var batchForgetIn = kernel.FuseBatchForgetIn{}
-		// common.ParseBinary(bcontent, batchForgetIn)
 		batchForgetIn.ParseBinary(bcontent)
 		arg = batchForgetIn
 		req.Arg = &arg
@@ -647,7 +612,6 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		// readdirplus event
 
 		var readIn = kernel.FuseReadIn{}
-		// common.ParseBinary(bcontent, &readIn)
 		readIn.ParseBinary(bcontent)
 		arg = readIn
 		req.Arg = &arg
