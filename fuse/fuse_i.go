@@ -194,3 +194,9 @@ type FusePollhandle struct {
 	Kh uint64
 	Se FuseSession
 }
+
+type FuseStat struct {
+	Nodeid     uint64
+	Generation uint64
+	Stat       syscall.Stat_t
+}

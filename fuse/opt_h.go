@@ -136,7 +136,7 @@ type FuseOpt struct {
 	 * @param generation the file generation id
 	 * @param stat the file stat
 	 */
-	Mknod *func(req FuseReq, parentid uint64, name string, mode uint32, rdev uint32, nodeid *uint64, generation *uint64, stat *syscall.Stat_t) int32
+	Mknod *func(req FuseReq, parentid uint64, name string, mode uint32, rdev uint32) (*FuseStat, int32)
 
 	/**
 	 * Create a directory
@@ -147,7 +147,7 @@ type FuseOpt struct {
 	 * @param name to create
 	 * @param mode with which to create the new file
 	 */
-	Mkdir *func(req FuseReq, parentid uint64, name string, mode uint32, nodeid *uint64, generation *uint64, stat *syscall.Stat_t) int32
+	Mkdir *func(req FuseReq, parentid uint64, name string, mode uint32) (*FuseStat, int32)
 
 	/**
 	 * Remove a directory
@@ -187,7 +187,7 @@ type FuseOpt struct {
 	 * @param parent inode number of the parent directory
 	 * @param name to create
 	 */
-	Symlink *func(req FuseReq, parentid uint64, link string, name string, nodeid *uint64, generation *uint64, stat *syscall.Stat_t) int32
+	Symlink *func(req FuseReq, parentid uint64, link string, name string) (*FuseStat, int32)
 
 	/** Rename a file
 	 *
@@ -227,7 +227,7 @@ type FuseOpt struct {
 	 * @param newparent inode number of the new parent directory
 	 * @param newname new name to create
 	 */
-	Link *func(req FuseReq, oldnodeid uint64, newparentid uint64, newname string, nodeid *uint64, generation *uint64, stat *syscall.Stat_t) int32
+	Link *func(req FuseReq, oldnodeid uint64, newparentid uint64, newname string) (*FuseStat, int32)
 
 	/**
 	* Open a file
@@ -427,7 +427,7 @@ type FuseOpt struct {
 	 * @param off offset to continue reading the directory stream
 	 * @param fi file information
 	 */
-	Readdir *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (int32, []kernel.FuseDirent)
+	Readdir *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) ([]kernel.FuseDirent, int32)
 
 	/**
 	 * Release an open directory
@@ -596,7 +596,7 @@ type FuseOpt struct {
 	 * @param mode file type and mode with which to create the new file
 	 * @param fi file information
 	 */
-	Create *func(req FuseReq, parentid uint64, name string, mode uint32, fi FuseFileInfo, nodeid *uint64, generation *uint64, stat *syscall.Stat_t) int32
+	Create *func(req FuseReq, parentid uint64, name string, mode uint32, fi FuseFileInfo) (*FuseStat, int32)
 
 	/**
 	 * Test for a POSIX file lock

@@ -348,20 +348,17 @@ func doMknod(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 	}
 
 	if se.Opts != nil && se.Opts.Mknod != nil {
-		var entryId uint64
-		var generation uint64
-		stat := syscall.Stat_t{}
 
-		res := (*se.Opts.Mknod)(req, nodeid, mknodIn.Name, mknodIn.Mode, mknodIn.Rdev, &entryId, &generation, &stat)
+		stat, res := (*se.Opts.Mknod)(req, nodeid, mknodIn.Name, mknodIn.Mode, mknodIn.Rdev)
 
 		if res == errno.SUCCESS {
-			entryOut.NodeId = entryId
-			entryOut.Generation = generation
+			entryOut.NodeId = stat.Nodeid
+			entryOut.Generation = stat.Generation
 			entryOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
 			entryOut.EntryValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.EntryValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
-			setFuseAttr(&entryOut.Attr, stat)
+			setFuseAttr(&entryOut.Attr, stat.Stat)
 		}
 
 		return res
@@ -376,25 +373,21 @@ func doMkdir(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 	se := req.session
 
 	if se.Debug {
-		log.Trace.Printf("Mkdir: %v \n", mkdirIn)
+		log.Trace.Printf("Mkdir: %+v \n", mkdirIn)
 	}
 
 	if se.Opts != nil && se.Opts.Mkdir != nil {
 
-		var entryId uint64
-		var generation uint64
-		stat := syscall.Stat_t{}
-
-		res := (*se.Opts.Mkdir)(req, nodeid, mkdirIn.Name, mkdirIn.Mode, &entryId, &generation, &stat)
+		stat, res := (*se.Opts.Mkdir)(req, nodeid, mkdirIn.Name, mkdirIn.Mode)
 
 		if res == errno.SUCCESS {
-			entryOut.NodeId = entryId
-			entryOut.Generation = generation
+			entryOut.NodeId = stat.Nodeid
+			entryOut.Generation = stat.Generation
 			entryOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
 			entryOut.EntryValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.EntryValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
-			setFuseAttr(&entryOut.Attr, stat)
+			setFuseAttr(&entryOut.Attr, stat.Stat)
 		}
 
 		return res
@@ -453,20 +446,16 @@ func doSymlink(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 
 
 	if se.Opts != nil && se.Opts.Symlink != nil {
 
-		var entryId uint64
-		var generation uint64
-		stat := syscall.Stat_t{}
-
-		res := (*se.Opts.Symlink)(req, nodeid, symlinkIn.LinkName, symlinkIn.Name, &entryId, &generation, &stat)
+		stat, res := (*se.Opts.Symlink)(req, nodeid, symlinkIn.LinkName, symlinkIn.Name)
 
 		if res == errno.SUCCESS {
-			entryOut.NodeId = entryId
-			entryOut.Generation = generation
+			entryOut.NodeId = stat.Nodeid
+			entryOut.Generation = stat.Generation
 			entryOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
 			entryOut.EntryValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.EntryValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
-			setFuseAttr(&entryOut.Attr, stat)
+			setFuseAttr(&entryOut.Attr, stat.Stat)
 		}
 
 		return res
@@ -523,20 +512,17 @@ func doLink(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 	}
 
 	if se.Opts != nil && se.Opts.Link != nil {
-		var entryId uint64
-		var generation uint64
-		stat := syscall.Stat_t{}
 
-		res := (*se.Opts.Link)(req, linklIn.OldNodeid, nodeid, linklIn.NewName, &entryId, &generation, &stat)
+		stat, res := (*se.Opts.Link)(req, linklIn.OldNodeid, nodeid, linklIn.NewName)
 
 		if res == errno.SUCCESS {
-			entryOut.NodeId = entryId
-			entryOut.Generation = generation
+			entryOut.NodeId = stat.Nodeid
+			entryOut.Generation = stat.Generation
 			entryOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
 			entryOut.EntryValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.EntryValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
-			setFuseAttr(&entryOut.Attr, stat)
+			setFuseAttr(&entryOut.Attr, stat.Stat)
 		}
 
 		return res
@@ -728,7 +714,7 @@ func doReaddir(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 
 		fi.Fh = readIn.Fh
 
-		res, dirList := (*se.Opts.Readdir)(req, nodeid, readIn.Size, readIn.Offset, fi)
+		dirList, res := (*se.Opts.Readdir)(req, nodeid, readIn.Size, readIn.Offset, fi)
 
 		if res == errno.SUCCESS {
 
@@ -819,9 +805,8 @@ func doStatfs(req FuseReq, nodeid uint64, statfsOut *kernel.FuseStatfsOut) int32
 		log.Trace.Println("Statfs")
 	}
 
+	var statfs = kernel.FuseStatfs{}
 	if se.Opts != nil && se.Opts.Statfs != nil {
-
-		var statfs = kernel.FuseStatfs{}
 
 		res := (*se.Opts.Statfs)(req, nodeid, &statfs)
 
@@ -829,7 +814,12 @@ func doStatfs(req FuseReq, nodeid uint64, statfsOut *kernel.FuseStatfsOut) int32
 
 		return res
 	} else {
-		return errno.ENOSYS
+		statfs.NameLen = 255
+		statfs.Bsize = 512
+
+		statfsOut.St = statfs
+
+		return errno.SUCCESS
 	}
 }
 
@@ -964,21 +954,16 @@ func doCreate(req FuseReq, nodeid uint64, createOut *kernel.FuseEntryOut) int32 
 		fi := NewFuseFileInfo()
 		fi.Flags = createIn.Flags
 
-		var entryId uint64
-		var generation uint64
-
-		stat := syscall.Stat_t{}
-
-		res := (*se.Opts.Create)(req, nodeid, createIn.Name, createIn.Mode, fi, &entryId, &generation, &stat)
+		stat, res := (*se.Opts.Create)(req, nodeid, createIn.Name, createIn.Mode, fi)
 
 		if res == errno.SUCCESS {
-			createOut.NodeId = entryId
-			createOut.Generation = generation
+			createOut.NodeId = stat.Nodeid
+			createOut.Generation = stat.Generation
 			createOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			createOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
 			createOut.EntryValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			createOut.EntryValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
-			setFuseAttr(&createOut.Attr, stat)
+			setFuseAttr(&createOut.Attr, stat.Stat)
 		}
 
 		return res
