@@ -25,6 +25,17 @@ const FOPEN_DIRECT_IO = (1 << 0)
 const FOPEN_KEEP_CACHE = (1 << 1)
 const FOPEN_NONSEEKABLE = (1 << 2)
 
+/* 'to_set' flags in setattr */
+const FUSE_SET_ATTR_MODE = (1 << 0)
+const FUSE_SET_ATTR_UID = (1 << 1)
+const FUSE_SET_ATTR_GID = (1 << 2)
+const FUSE_SET_ATTR_SIZE = (1 << 3)
+const FUSE_SET_ATTR_ATIME = (1 << 4)
+const FUSE_SET_ATTR_MTIME = (1 << 5)
+const FUSE_SET_ATTR_ATIME_NOW = (1 << 7)
+const FUSE_SET_ATTR_MTIME_NOW = (1 << 8)
+const FUSE_SET_ATTR_CTIME = (1 << 10)
+
 type FuseConnInfo struct {
 	Major        uint32
 	Minor        uint32
