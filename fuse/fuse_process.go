@@ -940,7 +940,7 @@ func doAccess(req FuseReq, nodeid uint64) int32 {
 
 }
 
-func doCreate(req FuseReq, nodeid uint64, createOut *kernel.FuseEntryOut) int32 {
+func doCreate(req FuseReq, nodeid uint64, createOut *kernel.FuseCreateOut) int32 {
 
 	createIn := (*req.Arg).(kernel.FuseCreateIn)
 	se := req.session
@@ -954,16 +954,19 @@ func doCreate(req FuseReq, nodeid uint64, createOut *kernel.FuseEntryOut) int32 
 		fi := NewFuseFileInfo()
 		fi.Flags = createIn.Flags
 
-		stat, res := (*se.Opts.Create)(req, nodeid, createIn.Name, createIn.Mode, fi)
+		stat, res := (*se.Opts.Create)(req, nodeid, createIn.Name, createIn.Mode, &fi)
 
 		if res == errno.SUCCESS {
-			createOut.NodeId = stat.Nodeid
-			createOut.Generation = stat.Generation
-			createOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
-			createOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
-			createOut.EntryValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
-			createOut.EntryValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
-			setFuseAttr(&createOut.Attr, stat.Stat)
+
+			createOut.Entry.NodeId = stat.Nodeid
+			createOut.Entry.Generation = stat.Generation
+			createOut.Entry.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
+			createOut.Entry.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
+			createOut.Entry.EntryValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
+			createOut.Entry.EntryValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
+			setFuseAttr(&createOut.Entry.Attr, stat.Stat)
+
+			setOpenOut(&createOut.Open, fi)
 		}
 
 		return res

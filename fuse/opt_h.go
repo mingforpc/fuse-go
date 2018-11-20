@@ -594,9 +594,9 @@ type FuseOpt struct {
 	 * @param parent inode number of the parent directory
 	 * @param name to create
 	 * @param mode file type and mode with which to create the new file
-	 * @param fi file information
+	 * @param fi file information, 用来设置Open的操作
 	 */
-	Create *func(req FuseReq, parentid uint64, name string, mode uint32, fi FuseFileInfo) (*FuseStat, int32)
+	Create *func(req FuseReq, parentid uint64, name string, mode uint32, fi *FuseFileInfo) (*FuseStat, int32)
 
 	/**
 	 * Test for a POSIX file lock

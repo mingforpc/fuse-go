@@ -74,7 +74,7 @@ func (link FuseReadlinkOut) ToBinary() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// lookup, symlink, mknod, mkdir, link, create
+// lookup, symlink, mknod, mkdir, link
 type FuseEntryOut struct {
 	NodeId         uint64 /* Inode ID */
 	Generation     uint64 /* Inode generation: nodeid:gen must be unique for the fs's lifetime */
@@ -89,6 +89,18 @@ type FuseEntryOut struct {
 func (entry FuseEntryOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(entry)
+}
+
+// create
+// create 要返回FuseEntryOut和FuseOpenOut
+type FuseCreateOut struct {
+	Entry FuseEntryOut
+	Open  FuseOpenOut
+}
+
+func (create FuseCreateOut) ToBinary() ([]byte, error) {
+
+	return common.ToBinary(create)
 }
 
 // open, opendir

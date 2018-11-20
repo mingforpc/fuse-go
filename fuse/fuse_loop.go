@@ -504,7 +504,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		arg = createIn
 		req.Arg = &arg
 
-		var createOut = kernel.FuseEntryOut{}
+		var createOut = kernel.FuseCreateOut{}
 
 		errnum = doCreate(*req, inHeader.Nodeid, &createOut)
 
