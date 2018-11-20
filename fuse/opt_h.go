@@ -446,6 +446,32 @@ type FuseOpt struct {
 	Releasedir *func(req FuseReq, nodeid uint64, fi FuseFileInfo) int32
 
 	/**
+	 * Release an open file
+	 *
+	 * Release is called when there are no more references to an open
+	 * file: all file descriptors are closed and all memory mappings
+	 * are unmapped.
+	 *
+	 * For every open call there will be exactly one release call.
+	 *
+	 * The filesystem may reply with an error, but error values are
+	 * not returned to close() or munmap() which triggered the
+	 * release.
+	 *
+	 * fi->fh will contain the value set by the open method, or will
+	 * be undefined if the open method didn't set any value.
+	 * fi->flags will contain the same flags as for open.
+	 *
+	 * Valid replies:
+	 *   fuse_reply_err
+	 *
+	 * @param req request handle
+	 * @param ino the inode number
+	 * @param fi file information
+	 */
+	Release *func(req FuseReq, nodeid uint64, fi FuseFileInfo) int32
+
+	/**
 	 * Synchronize directory contents
 	 *
 	 * If the datasync parameter is non-zero, then only the directory

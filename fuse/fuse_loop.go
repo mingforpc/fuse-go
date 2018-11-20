@@ -2,6 +2,7 @@ package fuse
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 
 	"github.com/mingforpc/fuse-go/fuse/errno"
@@ -405,6 +406,15 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = readOut
 
+	case kernel.FUSE_RELEASE:
+		// Release event
+		var releaseIn = kernel.FuseReleaseIn{}
+		releaseIn.ParseBinary(bcontent)
+		arg = releaseIn
+		req.Arg = &arg
+
+		errnum = doRelease(*req, inHeader.Nodeid)
+
 	case kernel.FUSE_RELEASEDIR:
 		// Releasedir event
 		var releasedirIn = kernel.FuseReleaseIn{}
@@ -413,6 +423,14 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		req.Arg = &arg
 
 		errnum = doReleasedir(*req, inHeader.Nodeid)
+
+	case kernel.FUSE_FLUSH:
+		var flushIn = kernel.FuseFlushIn{}
+		flushIn.ParseBinary(bcontent)
+		arg = flushIn
+		req.Arg = &arg
+
+		errnum = doFlush(*req, inHeader.Nodeid)
 
 	case kernel.FUSE_FSYNCDIR:
 		// Fsyncdir event
@@ -624,6 +642,9 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		errnum = doReaddirplus(*req, inHeader.Nodeid, &readOut)
 
 		resp = readOut
+
+	default:
+		panic(errors.New("未实现的操作！！！"))
 	}
 
 	var bresp []byte

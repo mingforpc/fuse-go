@@ -627,7 +627,7 @@ func doFlush(req FuseReq, nodeid uint64) int32 {
 	se := req.session
 
 	if se.Debug {
-		log.Trace.Printf("Flush: %v \n", flushIn)
+		log.Trace.Printf("Flush: %+v \n", flushIn)
 	}
 
 	if se.Opts != nil && se.Opts.Flush != nil {
@@ -645,7 +645,7 @@ func doFlush(req FuseReq, nodeid uint64) int32 {
 
 		return res
 	} else {
-		return errno.ENOSYS
+		return errno.SUCCESS
 	}
 }
 
@@ -743,6 +743,30 @@ func doReaddir(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 		return res
 	} else {
 		return errno.ENOSYS
+	}
+
+}
+
+func doRelease(req FuseReq, nodeid uint64) int32 {
+
+	releaseIn := (*req.Arg).(kernel.FuseReleaseIn)
+	se := req.session
+
+	if se.Debug {
+		log.Trace.Printf("Release: %+v \n", releaseIn)
+	}
+
+	if se.Opts != nil && se.Opts.Release != nil {
+
+		fi := NewFuseFileInfo()
+		fi.Flags = releaseIn.Flags
+		fi.Fh = releaseIn.Fh
+
+		res := (*se.Opts.Release)(req, nodeid, fi)
+
+		return res
+	} else {
+		return errno.SUCCESS
 	}
 
 }
