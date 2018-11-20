@@ -639,13 +639,19 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		outHeader.Error = errnum
 		outHeader.Unique = inHeader.Unique
 
-		if req.session.Debug {
-			log.Trace.Printf("outHeader[%+v], resp[%+v]", outHeader, resp)
-		}
-
 		if errnum == errno.SUCCESS {
+
+			if req.session.Debug {
+				log.Trace.Printf("errnum[%d], outHeader[%+v], resp[%+v]", errnum, outHeader, resp)
+			}
+
 			bresp, err = generateResp(outHeader, resp)
 		} else {
+
+			if req.session.Debug {
+				log.Trace.Printf("errnum[%d], outHeader[%+v]", errnum, outHeader)
+			}
+
 			bresp, err = generateResp(outHeader, nil)
 		}
 
