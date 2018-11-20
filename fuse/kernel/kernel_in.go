@@ -533,7 +533,8 @@ func (create *FuseCreateIn) ParseBinary(bcontent []byte) error {
 	common.ParseBinary(bcontent[8:12], &create.Umask)
 	common.ParseBinary(bcontent[12:16], &create.Padding)
 
-	create.Name = string(bcontent[16:])
+	// length-1 是为了避开最后一个\0字符
+	create.Name = string(bcontent[16 : length-1])
 
 	return nil
 }

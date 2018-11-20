@@ -46,7 +46,7 @@ func (se *FuseSession) FuseLoop() {
 
 		defer func() {
 			if err := recover(); err != nil {
-				fmt.Printf("Read goroutine error[%s] \n", err)
+				log.Error.Printf("Read goroutine error[%s] \n", err)
 			}
 		}()
 
@@ -55,7 +55,7 @@ func (se *FuseSession) FuseLoop() {
 			breq, err := se.readCmd()
 			if err != nil {
 
-				fmt.Println(err)
+				log.Error.Println(err)
 				break
 			}
 
@@ -135,7 +135,6 @@ func (se *FuseSession) readCmd() ([]byte, error) {
 
 	n, err := se.Dev.Read(cmdLenBytes)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -509,7 +508,11 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doCreate(*req, inHeader.Nodeid, &createOut)
 
-		resp = createOut
+		if errnum == errno.ENOENT {
+			noreply = true
+		} else {
+			resp = createOut
+		}
 
 	case kernel.FUSE_GETLK:
 		// Getlk event
