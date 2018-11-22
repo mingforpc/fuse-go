@@ -329,7 +329,7 @@ type FuseOpt struct {
 	 * @param off offset to write to
 	 * @param fi file information
 	 */
-	Write *func(req FuseReq, nodeid uint64, buf []byte, offset uint64, fi *FuseFileInfo, outSize *uint32) int32
+	Write *func(req FuseReq, nodeid uint64, buf []byte, offset uint64, fi FuseFileInfo) (size uint32, res int32)
 
 	/**
 	 * Flush method

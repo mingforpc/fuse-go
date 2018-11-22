@@ -613,7 +613,9 @@ func doWrite(req FuseReq, nodeid uint64, writeOut *kernel.FuseWriteOut) int32 {
 			fi.Flags = writeIn.Flags
 		}
 
-		res := (*se.Opts.Write)(req, nodeid, writeIn.Buf, writeIn.Offset, &fi, &writeOut.Size)
+		size, res := (*se.Opts.Write)(req, nodeid, writeIn.Buf, writeIn.Offset, fi)
+
+		writeOut.Size = size
 
 		return res
 	} else {
