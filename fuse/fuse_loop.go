@@ -57,6 +57,8 @@ func (se *FuseSession) FuseLoop() {
 			if err != nil {
 
 				log.Error.Println(err)
+				// 读出错退出
+				se.Close()
 				break
 			}
 
