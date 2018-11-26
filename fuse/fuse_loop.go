@@ -194,6 +194,11 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = initOut
 
+	case kernel.FUSE_DESTROY:
+		// Destory event
+
+		errnum = doDestory(*req, inHeader.Nodeid)
+
 	case kernel.FUSE_FORGET:
 		// Forget event
 		var fotgetIn = kernel.FuseForgetIn{}

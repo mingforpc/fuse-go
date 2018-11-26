@@ -218,7 +218,7 @@ func doDestory(req FuseReq, nodeid uint64) int32 {
 
 		return res
 	} else {
-		return errno.ENOSYS
+		return errno.SUCCESS
 	}
 
 }
