@@ -431,7 +431,7 @@ func (getxattr *FuseGetxattrIn) ParseBinary(bcontent []byte) error {
 	common.ParseBinary(bcontent[:4], &getxattr.Size)
 	common.ParseBinary(bcontent[4:8], &getxattr.Padding)
 
-	getxattr.Name = string(bcontent[8:])
+	getxattr.Name = string(bcontent[8 : length-1])
 
 	return nil
 }

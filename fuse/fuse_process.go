@@ -883,12 +883,8 @@ func doGetxattr(req FuseReq, nodeid uint64, getxattrOut *kernel.FuseGetxattrOut)
 		value, res := (*se.Opts.Getxattr)(req, nodeid, getxattrIn.Name, getxattrIn.Size)
 
 		size := len(value)
-		if getxattrIn.Size == 0 {
-			getxattrOut.Size = uint32(size)
-		} else {
-			getxattrOut.Size = uint32(size)
-			getxattrOut.Value = kernel.XattrVal(value)
-		}
+		getxattrOut.Size = uint32(size)
+		getxattrOut.Value = kernel.XattrVal(value)
 
 		return res
 	} else {
