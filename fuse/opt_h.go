@@ -511,7 +511,7 @@ type FuseOpt struct {
 	 * send to the filesystem process.
 	 *
 	 */
-	Setxattr *func(req FuseReq, nodeid uint64, name string, value string, size uint32, flags uint32) int32
+	Setxattr *func(req FuseReq, nodeid uint64, name string, value string, flags uint32) int32
 
 	/**
 	 * Get an extended attribute

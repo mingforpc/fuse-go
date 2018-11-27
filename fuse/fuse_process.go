@@ -860,7 +860,7 @@ func doSetxattr(req FuseReq, nodeid uint64) int32 {
 
 	if se.Opts != nil && se.Opts.Setxattr != nil {
 
-		res := (*se.Opts.Setxattr)(req, nodeid, setxattrIn.Name, setxattrIn.Value, setxattrIn.Size, setxattrIn.Flags)
+		res := (*se.Opts.Setxattr)(req, nodeid, setxattrIn.Name, setxattrIn.Value, setxattrIn.Flags)
 
 		return res
 	} else {
