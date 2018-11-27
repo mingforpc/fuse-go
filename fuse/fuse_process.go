@@ -880,9 +880,7 @@ func doGetxattr(req FuseReq, nodeid uint64, getxattrOut *kernel.FuseGetxattrOut)
 
 	if se.Opts != nil && se.Opts.Getxattr != nil {
 
-		var value string
-
-		res := (*se.Opts.Getxattr)(req, nodeid, getxattrIn.Name, getxattrIn.Size, &value)
+		value, res := (*se.Opts.Getxattr)(req, nodeid, getxattrIn.Name, getxattrIn.Size)
 
 		size := len(value)
 		if getxattrIn.Size == 0 {

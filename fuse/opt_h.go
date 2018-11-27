@@ -536,7 +536,7 @@ type FuseOpt struct {
 	 * @param name of the extended attribute
 	 * @param size maximum size of the value to send
 	 */
-	Getxattr *func(req FuseReq, nodeid uint64, name string, size uint32, value *string) int32
+	Getxattr *func(req FuseReq, nodeid uint64, name string, size uint32) (value string, err int32)
 
 	/**
 	 * List extended attribute names
