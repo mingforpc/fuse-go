@@ -36,6 +36,10 @@ const FUSE_SET_ATTR_ATIME_NOW = (1 << 7)
 const FUSE_SET_ATTR_MTIME_NOW = (1 << 8)
 const FUSE_SET_ATTR_CTIME = (1 << 10)
 
+/* XATTR set flag  */
+const XATTR_CREATE = 0x1
+const XATTR_REPLACE = 0x2
+
 type FuseConnInfo struct {
 	Major        uint32
 	Minor        uint32
