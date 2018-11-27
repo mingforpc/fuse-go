@@ -431,7 +431,9 @@ func (getxattr *FuseGetxattrIn) ParseBinary(bcontent []byte) error {
 	common.ParseBinary(bcontent[:4], &getxattr.Size)
 	common.ParseBinary(bcontent[4:8], &getxattr.Padding)
 
-	getxattr.Name = string(bcontent[8 : length-1])
+	if length > 8 {
+		getxattr.Name = string(bcontent[8 : length-1])
+	}
 
 	return nil
 }
@@ -443,7 +445,10 @@ type FuseRemovexattrIn struct {
 
 func (removexattr *FuseRemovexattrIn) ParseBinary(bcontent []byte) error {
 
-	removexattr.Name = string(bcontent)
+	length := len(bcontent)
+	if length > 0 {
+		removexattr.Name = string(bcontent[:length-1])
+	}
 
 	return nil
 }

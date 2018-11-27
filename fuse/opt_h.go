@@ -561,7 +561,7 @@ type FuseOpt struct {
 	 * @param ino the inode number
 	 * @param size maximum size of the list to send
 	 */
-	Listxattr *func(req FuseReq, nodeid uint64, size uint32, list *string) int32
+	Listxattr *func(req FuseReq, nodeid uint64, size uint32) (list string, err int32)
 
 	/**
 	 * Remove an extended attribute

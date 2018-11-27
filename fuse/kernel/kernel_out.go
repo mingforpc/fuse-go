@@ -209,9 +209,11 @@ func (getxattr FuseGetxattrOut) ToBinary() ([]byte, error) {
 	binary.Write(buf, binary.LittleEndian, getxattr.Size)
 	binary.Write(buf, binary.LittleEndian, getxattr.Padding)
 
-	valb, _ := getxattr.Value.ToBinary()
-	buf.Write(valb)
-	buf.WriteByte(0)
+	if len(getxattr.Value) > 0 {
+		valb, _ := getxattr.Value.ToBinary()
+		buf.Write(valb)
+		buf.WriteByte(0)
+	}
 
 	return buf.Bytes(), nil
 }

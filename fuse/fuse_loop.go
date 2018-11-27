@@ -493,7 +493,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		req.Arg = &arg
 
 		var listxattrOut = kernel.FuseGetxattrOut{}
-		errnum = doGetxattr(*req, inHeader.Nodeid, &listxattrOut)
+		errnum = doListxattr(*req, inHeader.Nodeid, &listxattrOut)
 
 		if listxattrOut.Value == "" {
 			resp = listxattrOut

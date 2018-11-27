@@ -903,9 +903,7 @@ func doListxattr(req FuseReq, nodeid uint64, listxattrOut *kernel.FuseGetxattrOu
 
 	if se.Opts != nil && se.Opts.Listxattr != nil {
 
-		var attrlist string
-
-		res := (*se.Opts.Listxattr)(req, nodeid, listxattrIn.Size, &attrlist)
+		attrlist, res := (*se.Opts.Listxattr)(req, nodeid, listxattrIn.Size)
 
 		size := len(attrlist)
 		if listxattrIn.Size == 0 {
