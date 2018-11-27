@@ -2,6 +2,8 @@
 
 一个简单的libfuse实现，用来学习Golang的语法和好奇libfuse是怎么工作的
 
+相当于只实现了libfuse的low level接口
+
 ## 原理
 
 通过对`/dev/fuse`读写，获得内核fuse传过来的文件操作。
@@ -27,3 +29,7 @@ Padding uint32
 详细可以看看`fuse/kernel/`中的代码。
 
 Mount部分的代码，为了实现普通用户可以直接Mount，调用了`/bin/fusermount`（可能需要安装`libfuse`后才有），Mount的代码主要复制[go-fuse](https://github.com/hanwen/go-fuse)，然后自己做了小修改
+
+## 例子
+
+可以参考:[https://github.com/mingforpc/hadoop-fs](https://github.com/mingforpc/hadoop-fs)
