@@ -1236,6 +1236,18 @@ func doReaddirplus(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int3
 
 }
 
+func doInterrupt(req FuseReq) {
+	se := req.session
+
+	if se.Debug {
+		log.Trace.Println("Interrupt")
+	}
+
+	if se.Opts != nil && se.Opts.Readdirplus != nil {
+		(*se.Opts.Interrupt)(req)
+	}
+}
+
 const OFFSET_MAX = 0x7fffffffffffffff
 
 func convertFuseFileLock(lock kernel.FuseFileLock, flock *syscall.Flock_t) {

@@ -67,7 +67,7 @@ func (lookup *FuseLookupIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// forget (should not sne any reply)
+// forget (should not send any reply)
 type FuseForgetIn struct {
 	Nlookup uint64
 }

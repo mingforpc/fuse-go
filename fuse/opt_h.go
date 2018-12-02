@@ -779,4 +779,6 @@ type FuseOpt struct {
 	 * @param fi file information
 	 */
 	Readdirplus *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo, buf *bytes.Buffer) int32
+
+	Interrupt *func(req FuseReq)
 }

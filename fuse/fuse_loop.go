@@ -650,6 +650,11 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = readOut
 
+	case kernel.FUSE_INTERRUPT:
+		// interrupt event
+
+		doInterrupt(*req)
+
 	default:
 		panic(errors.New("未实现的操作！！！"))
 	}
