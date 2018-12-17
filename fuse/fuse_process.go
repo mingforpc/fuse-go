@@ -232,18 +232,17 @@ func doLookup(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 	}
 
 	if se.Opts != nil && se.Opts.Lookup != nil {
-		stat := syscall.Stat_t{}
-		var generation uint64
-		res := (*se.Opts.Lookup)(req, nodeid, lookupIn.Name, &stat, &generation)
+
+		fsStat, res := (*se.Opts.Lookup)(req, nodeid, lookupIn.Name)
 
 		if res == errno.SUCCESS {
-			entryOut.NodeId = stat.Ino
-			entryOut.Generation = generation
+			entryOut.NodeId = fsStat.Nodeid
+			entryOut.Generation = fsStat.Generation
 			entryOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
 			entryOut.EntryValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.EntryValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
-			setFuseAttr(&entryOut.Attr, stat)
+			setFuseAttr(&entryOut.Attr, fsStat.Stat)
 		}
 
 		return res
@@ -276,15 +275,13 @@ func doGetattr(req FuseReq, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 
 	if se.Opts != nil && se.Opts.Getattr != nil {
 
-		stat := syscall.Stat_t{}
-
-		res := (*se.Opts.Getattr)(req, nodeid, &stat)
+		fsStat, res := (*se.Opts.Getattr)(req, nodeid)
 
 		if res == errno.SUCCESS {
 			attrOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			attrOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
 			attrOut.Dummp = getattrIn.Dummy
-			setFuseAttr(&attrOut.Attr, stat)
+			setFuseAttr(&attrOut.Attr, fsStat.Stat)
 		}
 
 		return res
@@ -304,15 +301,16 @@ func doSetattr(req FuseReq, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 	}
 
 	if se.Opts != nil && se.Opts.Setattr != nil {
-		stat := syscall.Stat_t{}
-		setattrInToStat(setattrIn, &stat)
+		fsStat := FuseStat{}
 
-		res := (*se.Opts.Setattr)(req, nodeid, &stat, setattrIn.Valid)
+		setattrInToStat(setattrIn, &fsStat.Stat)
+
+		res := (*se.Opts.Setattr)(req, nodeid, fsStat, setattrIn.Valid)
 
 		if res == errno.SUCCESS {
 			attrOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			attrOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
-			setFuseAttr(&attrOut.Attr, stat)
+			setFuseAttr(&attrOut.Attr, fsStat.Stat)
 		}
 
 		return res
@@ -330,7 +328,11 @@ func doReadlink(req FuseReq, nodeid uint64, attrOut *kernel.FuseReadlinkOut) int
 
 	if se.Opts != nil && se.Opts.Readlink != nil {
 
-		res := (*se.Opts.Readlink)(req, nodeid, &attrOut.Path)
+		path, res := (*se.Opts.Readlink)(req, nodeid)
+
+		if res == errno.SUCCESS {
+			attrOut.Path = path
+		}
 
 		return res
 	} else {
@@ -831,15 +833,18 @@ func doStatfs(req FuseReq, nodeid uint64, statfsOut *kernel.FuseStatfsOut) int32
 		log.Trace.Println("Statfs")
 	}
 
-	var statfs = kernel.FuseStatfs{}
 	if se.Opts != nil && se.Opts.Statfs != nil {
 
-		res := (*se.Opts.Statfs)(req, nodeid, &statfs)
+		statfs, res := (*se.Opts.Statfs)(req, nodeid)
 
-		statfsOut.St = statfs
+		if res == errno.SUCCESS {
+			statfsOut.St = *statfs
+
+		}
 
 		return res
 	} else {
+		statfs := kernel.FuseStatfs{}
 		statfs.NameLen = 255
 		statfs.Bsize = 512
 
@@ -1156,7 +1161,9 @@ func doPoll(req FuseReq, nodeid uint64, pollOut *kernel.FusePollOut) int32 {
 			ph.Se = *se
 		}
 
-		res := (*se.Opts.Poll)(req, nodeid, fi, ph, &pollOut.Revents)
+		revents, res := (*se.Opts.Poll)(req, nodeid, fi, ph)
+
+		pollOut.Revents = revents
 
 		return res
 	} else {
@@ -1221,12 +1228,10 @@ func doReaddirplus(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int3
 
 		fi.Fh = readIn.Fh
 
-		buf := bytes.NewBuffer(nil)
-
-		res := (*se.Opts.Readdirplus)(req, nodeid, readIn.Size, readIn.Offset, fi, buf)
+		content, res := (*se.Opts.Readdirplus)(req, nodeid, readIn.Size, readIn.Offset, fi)
 
 		if res == errno.SUCCESS {
-			readOut.Content = buf.Bytes()
+			readOut.Content = content
 		}
 
 		return res

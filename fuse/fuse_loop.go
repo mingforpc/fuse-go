@@ -3,7 +3,6 @@ package fuse
 import (
 	"bytes"
 	"errors"
-	"fmt"
 
 	"github.com/mingforpc/fuse-go/fuse/errno"
 	"github.com/mingforpc/fuse-go/fuse/kernel"
@@ -84,7 +83,7 @@ func (se *FuseSession) FuseLoop() {
 
 		if err != nil {
 
-			fmt.Println(err)
+			log.Error.Printf("Session parseHeader[%s] \n", err)
 			break
 		}
 
@@ -98,7 +97,7 @@ func (se *FuseSession) FuseLoop() {
 
 			defer func() {
 				if err := recover(); err != nil {
-					fmt.Printf("Distribute goroutine error[%s] \n", err)
+					log.Error.Printf("Distribute goroutine error[%s] \n", err)
 				}
 
 				se.wait.Done()

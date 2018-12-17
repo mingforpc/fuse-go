@@ -1,7 +1,6 @@
 package fuse
 
 import (
-	"bytes"
 	"syscall"
 
 	"github.com/mingforpc/fuse-go/fuse/kernel"
@@ -19,7 +18,7 @@ type FuseOpt struct {
 	 * There's no reply to this function
 	 *
 	 */
-	Destory *func(req FuseReq, nodeid uint64) int32
+	Destory *func(req FuseReq, nodeid uint64) (res int32)
 
 	/**
 	 * Look up a directory entry by name and get its attributes.
@@ -29,7 +28,7 @@ type FuseOpt struct {
 	 * @param name the name to look up
 	 * @param stat the file stat to return
 	 */
-	Lookup *func(req FuseReq, parentId uint64, name string, stat *syscall.Stat_t, generation *uint64) int32
+	Lookup *func(req FuseReq, parentId uint64, name string) (fsStat *FuseStat, res int32)
 
 	/**
 	 * Forget about an inode
@@ -83,7 +82,7 @@ type FuseOpt struct {
 	 * @param ino the inode number
 	 * @param stat the file stat
 	 */
-	Getattr *func(req FuseReq, nodeid uint64, stat *syscall.Stat_t) int32
+	Getattr *func(req FuseReq, nodeid uint64) (fsStat *FuseStat, res int32)
 
 	/**
 	 * Set file attributes
@@ -109,7 +108,7 @@ type FuseOpt struct {
 	 * @param attr the attributes
 	 * @param to_set bit mask of attributes which should be set
 	 */
-	Setattr *func(req FuseReq, nodeid uint64, attr *syscall.Stat_t, toSet uint32) int32
+	Setattr *func(req FuseReq, nodeid uint64, attr FuseStat, toSet uint32) (res int32)
 
 	/**
 	 * Read symbolic link
@@ -118,7 +117,7 @@ type FuseOpt struct {
 	 * @param req request handle
 	 * @param ino the inode number
 	 */
-	Readlink *func(req FuseReq, nodeid uint64, path *string) int32
+	Readlink *func(req FuseReq, nodeid uint64) (path string, res int32)
 
 	/**
 	 * Create file node
@@ -136,7 +135,7 @@ type FuseOpt struct {
 	 * @param generation the file generation id
 	 * @param stat the file stat
 	 */
-	Mknod *func(req FuseReq, parentid uint64, name string, mode uint32, rdev uint32) (*FuseStat, int32)
+	Mknod *func(req FuseReq, parentid uint64, name string, mode uint32, rdev uint32) (fsStat *FuseStat, res int32)
 
 	/**
 	 * Create a directory
@@ -147,7 +146,7 @@ type FuseOpt struct {
 	 * @param name to create
 	 * @param mode with which to create the new file
 	 */
-	Mkdir *func(req FuseReq, parentid uint64, name string, mode uint32) (*FuseStat, int32)
+	Mkdir *func(req FuseReq, parentid uint64, name string, mode uint32) (fsStat *FuseStat, res int32)
 
 	/**
 	 * Remove a directory
@@ -162,7 +161,7 @@ type FuseOpt struct {
 	 * @param parent inode number of the parent directory
 	 * @param name to remove
 	 */
-	Unlink *func(req FuseReq, parentid uint64, name string) int32
+	Unlink *func(req FuseReq, parentid uint64, name string) (res int32)
 
 	/**
 	 * Remove a directory
@@ -176,7 +175,7 @@ type FuseOpt struct {
 	 * @param parent inode number of the parent directory
 	 * @param name to remove
 	 */
-	Rmdir *func(req FuseReq, parentid uint64, name string) int32
+	Rmdir *func(req FuseReq, parentid uint64, name string) (res int32)
 
 	/**
 	 * Create a symbolic link
@@ -187,7 +186,7 @@ type FuseOpt struct {
 	 * @param parent inode number of the parent directory
 	 * @param name to create
 	 */
-	Symlink *func(req FuseReq, parentid uint64, link string, name string) (*FuseStat, int32)
+	Symlink *func(req FuseReq, parentid uint64, link string, name string) (fsStat *FuseStat, res int32)
 
 	/** Rename a file
 	 *
@@ -216,7 +215,7 @@ type FuseOpt struct {
 	 * @param newparent inode number of the new parent directory
 	 * @param newname new name
 	 */
-	Rename *func(req FuseReq, parentid uint64, name string, newparentid uint64, newname string) int32
+	Rename *func(req FuseReq, parentid uint64, name string, newparentid uint64, newname string) (res int32)
 
 	/**
 	 * Create a hard link
@@ -227,7 +226,7 @@ type FuseOpt struct {
 	 * @param newparent inode number of the new parent directory
 	 * @param newname new name to create
 	 */
-	Link *func(req FuseReq, oldnodeid uint64, newparentid uint64, newname string) (*FuseStat, int32)
+	Link *func(req FuseReq, oldnodeid uint64, newparentid uint64, newname string) (fsStat *FuseStat, res int32)
 
 	/**
 	* Open a file
@@ -282,7 +281,7 @@ type FuseOpt struct {
 	* @param ino the inode number
 	* @param fi file information
 	*/
-	Open *func(req FuseReq, nodeid uint64, fi *FuseFileInfo) int32
+	Open *func(req FuseReq, nodeid uint64, fi *FuseFileInfo) (res int32)
 
 	/**
 	 * Read data
@@ -304,7 +303,7 @@ type FuseOpt struct {
 	 * @param off offset to read from
 	 * @param fi file information
 	 */
-	Read *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) ([]byte, int32)
+	Read *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (content []byte, res int32)
 
 	/**
 	 * Write data
@@ -363,7 +362,7 @@ type FuseOpt struct {
 	 * @param ino the inode number
 	 * @param fi file information
 	 */
-	Flush *func(req FuseReq, nodeid uint64, fi FuseFileInfo) int32
+	Flush *func(req FuseReq, nodeid uint64, fi FuseFileInfo) (res int32)
 
 	/**
 	 * Synchronize file contents
@@ -382,7 +381,7 @@ type FuseOpt struct {
 	 * @param datasync flag indicating if only data should be flushed
 	 * @param fi file information
 	 */
-	Fsync *func(req FuseReq, nodeid uint64, datasync uint32, fi FuseFileInfo) int32
+	Fsync *func(req FuseReq, nodeid uint64, datasync uint32, fi FuseFileInfo) (res int32)
 
 	/**
 	 * Open a directory
@@ -402,7 +401,7 @@ type FuseOpt struct {
 	 * @param ino the inode number
 	 * @param fi file information
 	 */
-	Opendir *func(req FuseReq, nodeid uint64, fi *FuseFileInfo) int32
+	Opendir *func(req FuseReq, nodeid uint64, fi *FuseFileInfo) (res int32)
 
 	/**
 	 * Read directory
@@ -427,7 +426,7 @@ type FuseOpt struct {
 	 * @param off offset to continue reading the directory stream
 	 * @param fi file information
 	 */
-	Readdir *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) ([]kernel.FuseDirent, int32)
+	Readdir *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (direntList []kernel.FuseDirent, res int32)
 
 	/**
 	 * Release an open directory
@@ -443,7 +442,7 @@ type FuseOpt struct {
 	 * @param ino the inode number
 	 * @param fi file information
 	 */
-	Releasedir *func(req FuseReq, nodeid uint64, fi FuseFileInfo) int32
+	Releasedir *func(req FuseReq, nodeid uint64, fi FuseFileInfo) (res int32)
 
 	/**
 	 * Release an open file
@@ -469,7 +468,7 @@ type FuseOpt struct {
 	 * @param ino the inode number
 	 * @param fi file information
 	 */
-	Release *func(req FuseReq, nodeid uint64, fi FuseFileInfo) int32
+	Release *func(req FuseReq, nodeid uint64, fi FuseFileInfo) (res int32)
 
 	/**
 	 * Synchronize directory contents
@@ -491,7 +490,7 @@ type FuseOpt struct {
 	 * @param datasync flag indicating if only data should be flushed
 	 * @param fi file information
 	 */
-	Fsyncdir *func(req FuseReq, nodeid uint64, datasync uint32, fi FuseFileInfo) int32
+	Fsyncdir *func(req FuseReq, nodeid uint64, datasync uint32, fi FuseFileInfo) (res int32)
 
 	/**
 	 * Get file system statistics
@@ -500,7 +499,7 @@ type FuseOpt struct {
 	 * @param req request handle
 	 * @param ino the inode number, zero means "undefined"
 	 */
-	Statfs *func(req FuseReq, nodeid uint64, statfs *kernel.FuseStatfs) int32
+	Statfs *func(req FuseReq, nodeid uint64) (statfs *kernel.FuseStatfs, res int32)
 
 	/**
 	 * Set an extended attribute
@@ -511,7 +510,7 @@ type FuseOpt struct {
 	 * send to the filesystem process.
 	 *
 	 */
-	Setxattr *func(req FuseReq, nodeid uint64, name string, value string, flags uint32) int32
+	Setxattr *func(req FuseReq, nodeid uint64, name string, value string, flags uint32) (res int32)
 
 	/**
 	 * Get an extended attribute
@@ -576,7 +575,7 @@ type FuseOpt struct {
 	 * @param ino the inode number
 	 * @param name of the extended attribute
 	 */
-	Removexattr *func(req FuseReq, nodeid uint64, name string) int32
+	Removexattr *func(req FuseReq, nodeid uint64, name string) (res int32)
 
 	/**
 	 * Check file access permissions
@@ -596,7 +595,7 @@ type FuseOpt struct {
 	 * @param ino the inode number
 	 * @param mask requested access mode
 	 */
-	Access *func(req FuseReq, nodeid uint64, mask uint32) int32
+	Access *func(req FuseReq, nodeid uint64, mask uint32) (res int32)
 
 	/**
 	 * Create and open a file
@@ -622,7 +621,7 @@ type FuseOpt struct {
 	 * @param mode file type and mode with which to create the new file
 	 * @param fi file information, 用来设置Open的操作
 	 */
-	Create *func(req FuseReq, parentid uint64, name string, mode uint32, fi *FuseFileInfo) (*FuseStat, int32)
+	Create *func(req FuseReq, parentid uint64, name string, mode uint32, fi *FuseFileInfo) (fsStat *FuseStat, res int32)
 
 	/**
 	 * Test for a POSIX file lock
@@ -633,7 +632,7 @@ type FuseOpt struct {
 	 * @param fi file information
 	 * @param lock the region/type to test
 	 */
-	Getlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock *syscall.Flock_t) int32
+	Getlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock *syscall.Flock_t) (res int32)
 
 	/**
 	 * Acquire, modify or release a POSIX file lock
@@ -655,7 +654,7 @@ type FuseOpt struct {
 	 * @param lock the region/type to set
 	 * @param sleep locking operation may sleep
 	 */
-	Setlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock syscall.Flock_t, lksleep int) int32
+	Setlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock syscall.Flock_t, lksleep int) (res int32)
 
 	/**
 	 * Map block index within file to block index within device
@@ -674,7 +673,7 @@ type FuseOpt struct {
 	 * @param blocksize unit of block index
 	 * @param idx block index within file
 	 */
-	Bmap *func(req FuseReq, nodeid uint64, blocksize uint32, idx *uint64) int32
+	Bmap *func(req FuseReq, nodeid uint64, blocksize uint32, idx *uint64) (res int32)
 
 	/**
 	 * Ioctl
@@ -696,7 +695,7 @@ type FuseOpt struct {
 	 * @param in_bufsz number of fetched bytes
 	 * @param out_bufsz maximum size of output data
 	 */
-	Ioctl *func(req FuseReq, nodeid uint64, cmd uint32, arg uint64, fi FuseFileInfo, inbuf []byte, outbufsz uint32, ioctlOut *kernel.FuseIoctlOut) int32
+	Ioctl *func(req FuseReq, nodeid uint64, cmd uint32, arg uint64, fi FuseFileInfo, inbuf []byte, outbufsz uint32, ioctlOut *kernel.FuseIoctlOut) (res int32)
 
 	/**
 	 * Poll for IO readiness
@@ -724,7 +723,7 @@ type FuseOpt struct {
 	 * @param fi file information
 	 * @param ph poll handle to be used for notification
 	 */
-	Poll *func(req FuseReq, nodeid uint64, fi FuseFileInfo, ph *FusePollhandle, revents *uint32) int32
+	Poll *func(req FuseReq, nodeid uint64, fi FuseFileInfo, ph *FusePollhandle) (revents uint32, res int32)
 
 	/**
 	 * Forget about multiple inodes
@@ -755,7 +754,7 @@ type FuseOpt struct {
 	 * @param mode determines the operation to be performed on the given range,
 	 *             see fallocate(2)
 	 */
-	Fallocate *func(req FuseReq, nodeid uint64, mode uint32, offset uint64, length uint64, fi FuseFileInfo) int32
+	Fallocate *func(req FuseReq, nodeid uint64, mode uint32, offset uint64, length uint64, fi FuseFileInfo) (res int32)
 
 	/**
 	 * Read directory with attributes
@@ -778,7 +777,7 @@ type FuseOpt struct {
 	 * @param off offset to continue reading the directory stream
 	 * @param fi file information
 	 */
-	Readdirplus *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo, buf *bytes.Buffer) int32
+	Readdirplus *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (buf []byte, res int32)
 
 	Interrupt *func(req FuseReq)
 }
