@@ -19,11 +19,11 @@ func doInit(req FuseReq, nodeid uint64, initOut *kernel.FuseInitOut) int32 {
 		log.Trace.Printf("INIT: %+v \n", initIn)
 	}
 
-	bufsize := se.Bufsize
+	bufsize := se.bufsize
 
-	se.ConnInfo.Major = initIn.Major
-	se.ConnInfo.Minor = initIn.Minor
-	se.ConnInfo.MaxReadahead = initIn.MaxReadahead
+	se.connInfo.Major = initIn.Major
+	se.connInfo.Minor = initIn.Minor
+	se.connInfo.MaxReadahead = initIn.MaxReadahead
 
 	if bufsize < kernel.FUSE_MIN_READ_BUFFER {
 		log.Warning.Printf("fuse: warning: buffer size too small: %d\n", bufsize)
@@ -31,175 +31,175 @@ func doInit(req FuseReq, nodeid uint64, initOut *kernel.FuseInitOut) int32 {
 	}
 
 	bufsize -= 4096
-	if uint32(bufsize) < se.ConnInfo.MaxWrite {
-		se.ConnInfo.MaxWrite = uint32(bufsize)
+	if uint32(bufsize) < se.connInfo.MaxWrite {
+		se.connInfo.MaxWrite = uint32(bufsize)
 	}
 
 	initOut.Major = kernel.FUSE_KERNEL_VERSION
 	initOut.Minor = kernel.FUSE_KERNEL_MINOR_VERSION
-	initOut.MaxReadahead = se.ConnInfo.MaxReadahead
-	initOut.MaxWrite = se.ConnInfo.MaxWrite
-	initOut.TimeGran = se.ConnInfo.TimeGran
-	initOut.CongestionThreshold = se.ConnInfo.CongestionThreshold
+	initOut.MaxReadahead = se.connInfo.MaxReadahead
+	initOut.MaxWrite = se.connInfo.MaxWrite
+	initOut.TimeGran = se.connInfo.TimeGran
+	initOut.CongestionThreshold = se.connInfo.CongestionThreshold
 
 	// To remember what fuse kernel can do
 	if initIn.Flags&kernel.FUSE_ASYNC_READ > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_ASYNC_READ
+		se.connInfo.Capable |= kernel.FUSE_ASYNC_READ
 	}
 	if initIn.Flags&kernel.FUSE_POSIX_LOCKS > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_POSIX_LOCKS
+		se.connInfo.Capable |= kernel.FUSE_POSIX_LOCKS
 	}
 	if initIn.Flags&kernel.FUSE_FILE_OPS > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_FILE_OPS
+		se.connInfo.Capable |= kernel.FUSE_FILE_OPS
 	}
 	if initIn.Flags&kernel.FUSE_ATOMIC_O_TRUNC > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_ATOMIC_O_TRUNC
+		se.connInfo.Capable |= kernel.FUSE_ATOMIC_O_TRUNC
 	}
 	if initIn.Flags&kernel.FUSE_EXPORT_SUPPORT > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_EXPORT_SUPPORT
+		se.connInfo.Capable |= kernel.FUSE_EXPORT_SUPPORT
 	}
 	if initIn.Flags&kernel.FUSE_BIG_WRITES > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_BIG_WRITES
+		se.connInfo.Capable |= kernel.FUSE_BIG_WRITES
 	}
 	if initIn.Flags&kernel.FUSE_DONT_MASK > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_DONT_MASK
+		se.connInfo.Capable |= kernel.FUSE_DONT_MASK
 	}
 	if initIn.Flags&kernel.FUSE_SPLICE_WRITE > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_SPLICE_WRITE
+		se.connInfo.Capable |= kernel.FUSE_SPLICE_WRITE
 	}
 	if initIn.Flags&kernel.FUSE_SPLICE_MOVE > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_SPLICE_MOVE
+		se.connInfo.Capable |= kernel.FUSE_SPLICE_MOVE
 	}
 	if initIn.Flags&kernel.FUSE_SPLICE_READ > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_SPLICE_READ
+		se.connInfo.Capable |= kernel.FUSE_SPLICE_READ
 	}
 	if initIn.Flags&kernel.FUSE_FLOCK_LOCKS > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_FLOCK_LOCKS
+		se.connInfo.Capable |= kernel.FUSE_FLOCK_LOCKS
 	}
 	if initIn.Flags&kernel.FUSE_HAS_IOCTL_DIR > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_HAS_IOCTL_DIR
+		se.connInfo.Capable |= kernel.FUSE_HAS_IOCTL_DIR
 	}
 	if initIn.Flags&kernel.FUSE_AUTO_INVAL_DATA > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_AUTO_INVAL_DATA
+		se.connInfo.Capable |= kernel.FUSE_AUTO_INVAL_DATA
 	}
 	if initIn.Flags&kernel.FUSE_DO_READDIRPLUS > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_DO_READDIRPLUS
+		se.connInfo.Capable |= kernel.FUSE_DO_READDIRPLUS
 	}
 	if initIn.Flags&kernel.FUSE_READDIRPLUS_AUTO > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_READDIRPLUS_AUTO
+		se.connInfo.Capable |= kernel.FUSE_READDIRPLUS_AUTO
 	}
 	if initIn.Flags&kernel.FUSE_ASYNC_DIO > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_ASYNC_DIO
+		se.connInfo.Capable |= kernel.FUSE_ASYNC_DIO
 	}
 	if initIn.Flags&kernel.FUSE_WRITEBACK_CACHE > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_WRITEBACK_CACHE
+		se.connInfo.Capable |= kernel.FUSE_WRITEBACK_CACHE
 	}
 	if initIn.Flags&kernel.FUSE_NO_OPEN_SUPPORT > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_NO_OPEN_SUPPORT
+		se.connInfo.Capable |= kernel.FUSE_NO_OPEN_SUPPORT
 	}
 	if initIn.Flags&kernel.FUSE_PARALLEL_DIROPS > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_PARALLEL_DIROPS
+		se.connInfo.Capable |= kernel.FUSE_PARALLEL_DIROPS
 	}
 	if initIn.Flags&kernel.FUSE_HANDLE_KILLPRIV > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_HANDLE_KILLPRIV
+		se.connInfo.Capable |= kernel.FUSE_HANDLE_KILLPRIV
 	}
 	if initIn.Flags&kernel.FUSE_POSIX_ACL > 0 {
-		se.ConnInfo.Capable |= kernel.FUSE_POSIX_ACL
+		se.connInfo.Capable |= kernel.FUSE_POSIX_ACL
 	}
 
 	// Default settings for modern filesystems.
 	// TODO: support write_buf, flock
-	if (se.ConnInfo.Capable & FUSE_CAP_ASYNC_READ) > 0 {
-		se.ConnInfo.Want |= FUSE_CAP_ASYNC_READ
+	if (se.connInfo.Capable & FUSE_CAP_ASYNC_READ) > 0 {
+		se.connInfo.Want |= FUSE_CAP_ASYNC_READ
 	}
-	if (se.ConnInfo.Capable & FUSE_CAP_PARALLEL_DIROPS) > 0 {
-		se.ConnInfo.Want |= FUSE_CAP_PARALLEL_DIROPS
+	if (se.connInfo.Capable & FUSE_CAP_PARALLEL_DIROPS) > 0 {
+		se.connInfo.Want |= FUSE_CAP_PARALLEL_DIROPS
 	}
-	if (se.ConnInfo.Capable & FUSE_CAP_AUTO_INVAL_DATA) > 0 {
-		se.ConnInfo.Want |= FUSE_CAP_AUTO_INVAL_DATA
+	if (se.connInfo.Capable & FUSE_CAP_AUTO_INVAL_DATA) > 0 {
+		se.connInfo.Want |= FUSE_CAP_AUTO_INVAL_DATA
 	}
-	if (se.ConnInfo.Capable & FUSE_CAP_HANDLE_KILLPRIV) > 0 {
-		se.ConnInfo.Want |= FUSE_CAP_HANDLE_KILLPRIV
+	if (se.connInfo.Capable & FUSE_CAP_HANDLE_KILLPRIV) > 0 {
+		se.connInfo.Want |= FUSE_CAP_HANDLE_KILLPRIV
 	}
-	if (se.ConnInfo.Capable & FUSE_CAP_ASYNC_DIO) > 0 {
-		se.ConnInfo.Want |= FUSE_CAP_ASYNC_DIO
+	if (se.connInfo.Capable & FUSE_CAP_ASYNC_DIO) > 0 {
+		se.connInfo.Want |= FUSE_CAP_ASYNC_DIO
 	}
-	if (se.ConnInfo.Capable & FUSE_CAP_IOCTL_DIR) > 0 {
-		se.ConnInfo.Want |= FUSE_CAP_IOCTL_DIR
+	if (se.connInfo.Capable & FUSE_CAP_IOCTL_DIR) > 0 {
+		se.connInfo.Want |= FUSE_CAP_IOCTL_DIR
 	}
-	if (se.ConnInfo.Capable & FUSE_CAP_ATOMIC_O_TRUNC) > 0 {
-		se.ConnInfo.Want |= FUSE_CAP_ATOMIC_O_TRUNC
+	if (se.connInfo.Capable & FUSE_CAP_ATOMIC_O_TRUNC) > 0 {
+		se.connInfo.Want |= FUSE_CAP_ATOMIC_O_TRUNC
 	}
 	if se.Opts.Getlk != nil && se.Opts.Setlk != nil {
-		se.ConnInfo.Want |= FUSE_CAP_POSIX_LOCKS
+		se.connInfo.Want |= FUSE_CAP_POSIX_LOCKS
 	}
 	if se.Opts.Readdirplus != nil {
-		se.ConnInfo.Want |= FUSE_CAP_READDIRPLUS
-		se.ConnInfo.Want |= FUSE_CAP_READDIRPLUS_AUTO
+		se.connInfo.Want |= FUSE_CAP_READDIRPLUS
+		se.connInfo.Want |= FUSE_CAP_READDIRPLUS_AUTO
 	}
 
 	// To set what we want fuse kenel to do
-	if se.ConnInfo.Want&kernel.FUSE_ASYNC_READ > 0 {
+	if se.connInfo.Want&kernel.FUSE_ASYNC_READ > 0 {
 		initOut.Flags |= kernel.FUSE_ASYNC_READ
 	}
-	if se.ConnInfo.Want&kernel.FUSE_POSIX_LOCKS > 0 {
+	if se.connInfo.Want&kernel.FUSE_POSIX_LOCKS > 0 {
 		initOut.Flags |= kernel.FUSE_POSIX_LOCKS
 	}
-	if se.ConnInfo.Want&kernel.FUSE_FILE_OPS > 0 {
+	if se.connInfo.Want&kernel.FUSE_FILE_OPS > 0 {
 		initOut.Flags |= kernel.FUSE_FILE_OPS
 	}
-	if se.ConnInfo.Want&kernel.FUSE_ATOMIC_O_TRUNC > 0 {
+	if se.connInfo.Want&kernel.FUSE_ATOMIC_O_TRUNC > 0 {
 		initOut.Flags |= kernel.FUSE_ATOMIC_O_TRUNC
 	}
-	if se.ConnInfo.Want&kernel.FUSE_EXPORT_SUPPORT > 0 {
+	if se.connInfo.Want&kernel.FUSE_EXPORT_SUPPORT > 0 {
 		initOut.Flags |= kernel.FUSE_EXPORT_SUPPORT
 	}
-	if se.ConnInfo.Want&kernel.FUSE_BIG_WRITES > 0 {
+	if se.connInfo.Want&kernel.FUSE_BIG_WRITES > 0 {
 		initOut.Flags |= kernel.FUSE_BIG_WRITES
 	}
-	if se.ConnInfo.Want&kernel.FUSE_DONT_MASK > 0 {
+	if se.connInfo.Want&kernel.FUSE_DONT_MASK > 0 {
 		initOut.Flags |= kernel.FUSE_DONT_MASK
 	}
-	if se.ConnInfo.Want&kernel.FUSE_SPLICE_WRITE > 0 {
+	if se.connInfo.Want&kernel.FUSE_SPLICE_WRITE > 0 {
 		initOut.Flags |= kernel.FUSE_SPLICE_WRITE
 	}
-	if se.ConnInfo.Want&kernel.FUSE_SPLICE_MOVE > 0 {
+	if se.connInfo.Want&kernel.FUSE_SPLICE_MOVE > 0 {
 		initOut.Flags |= kernel.FUSE_SPLICE_MOVE
 	}
-	if se.ConnInfo.Want&kernel.FUSE_SPLICE_READ > 0 {
+	if se.connInfo.Want&kernel.FUSE_SPLICE_READ > 0 {
 		initOut.Flags |= kernel.FUSE_SPLICE_READ
 	}
-	if se.ConnInfo.Want&kernel.FUSE_FLOCK_LOCKS > 0 {
+	if se.connInfo.Want&kernel.FUSE_FLOCK_LOCKS > 0 {
 		initOut.Flags |= kernel.FUSE_FLOCK_LOCKS
 	}
-	if se.ConnInfo.Want&kernel.FUSE_HAS_IOCTL_DIR > 0 {
+	if se.connInfo.Want&kernel.FUSE_HAS_IOCTL_DIR > 0 {
 		initOut.Flags |= kernel.FUSE_HAS_IOCTL_DIR
 	}
-	if se.ConnInfo.Want&kernel.FUSE_AUTO_INVAL_DATA > 0 {
+	if se.connInfo.Want&kernel.FUSE_AUTO_INVAL_DATA > 0 {
 		initOut.Flags |= kernel.FUSE_AUTO_INVAL_DATA
 	}
-	if se.ConnInfo.Want&kernel.FUSE_DO_READDIRPLUS > 0 {
+	if se.connInfo.Want&kernel.FUSE_DO_READDIRPLUS > 0 {
 		initOut.Flags |= kernel.FUSE_DO_READDIRPLUS
 	}
-	if se.ConnInfo.Want&kernel.FUSE_READDIRPLUS_AUTO > 0 {
+	if se.connInfo.Want&kernel.FUSE_READDIRPLUS_AUTO > 0 {
 		initOut.Flags |= kernel.FUSE_READDIRPLUS_AUTO
 	}
-	if se.ConnInfo.Want&kernel.FUSE_ASYNC_DIO > 0 {
+	if se.connInfo.Want&kernel.FUSE_ASYNC_DIO > 0 {
 		initOut.Flags |= kernel.FUSE_ASYNC_DIO
 	}
-	if se.ConnInfo.Want&kernel.FUSE_WRITEBACK_CACHE > 0 {
+	if se.connInfo.Want&kernel.FUSE_WRITEBACK_CACHE > 0 {
 		initOut.Flags |= kernel.FUSE_WRITEBACK_CACHE
 	}
-	if se.ConnInfo.Want&kernel.FUSE_NO_OPEN_SUPPORT > 0 {
+	if se.connInfo.Want&kernel.FUSE_NO_OPEN_SUPPORT > 0 {
 		initOut.Flags |= kernel.FUSE_NO_OPEN_SUPPORT
 	}
-	if se.ConnInfo.Want&kernel.FUSE_PARALLEL_DIROPS > 0 {
+	if se.connInfo.Want&kernel.FUSE_PARALLEL_DIROPS > 0 {
 		initOut.Flags |= kernel.FUSE_PARALLEL_DIROPS
 	}
-	if se.ConnInfo.Want&kernel.FUSE_HANDLE_KILLPRIV > 0 {
+	if se.connInfo.Want&kernel.FUSE_HANDLE_KILLPRIV > 0 {
 		initOut.Flags |= kernel.FUSE_HANDLE_KILLPRIV
 	}
-	if se.ConnInfo.Want&kernel.FUSE_POSIX_ACL > 0 {
+	if se.connInfo.Want&kernel.FUSE_POSIX_ACL > 0 {
 		initOut.Flags |= kernel.FUSE_POSIX_ACL
 	}
 
@@ -573,7 +573,7 @@ func doRead(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 		fi := NewFuseFileInfo()
 
 		fi.Fh = readIn.Fh
-		if req.session.ConnInfo.Minor >= 9 {
+		if req.session.connInfo.Minor >= 9 {
 			fi.LockOwner = readIn.LockOwner
 			fi.Flags = readIn.Flags
 		}
@@ -610,7 +610,7 @@ func doWrite(req FuseReq, nodeid uint64, writeOut *kernel.FuseWriteOut) int32 {
 			fi.Writepage = 1
 		}
 
-		if req.session.ConnInfo.Minor >= 9 {
+		if req.session.connInfo.Minor >= 9 {
 			fi.LockOwner = writeIn.LockOwner
 			fi.Flags = writeIn.Flags
 		}
@@ -641,7 +641,7 @@ func doFlush(req FuseReq, nodeid uint64) int32 {
 		fi.Fh = flushIn.Fh
 		fi.Flush = 1
 
-		if req.session.ConnInfo.Minor >= 9 {
+		if req.session.connInfo.Minor >= 9 {
 			fi.LockOwner = flushIn.LockOwner
 		}
 
@@ -1120,7 +1120,7 @@ func doIoctl(req FuseReq, nodeid uint64, ioctlOut *kernel.FuseIoctlOut) int32 {
 
 	flags := ioctlIn.Flags
 
-	if (flags&kernel.FUSE_IOCTL_DIR) > 0 && (se.ConnInfo.Want&FUSE_CAP_IOCTL_DIR) == 0 {
+	if (flags&kernel.FUSE_IOCTL_DIR) > 0 && (se.connInfo.Want&FUSE_CAP_IOCTL_DIR) == 0 {
 		return errno.ENOSYS
 	}
 

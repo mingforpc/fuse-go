@@ -71,7 +71,7 @@ func Mount(se *fuse.FuseSession) (err error) {
 		return err
 	}
 
-	se.Dev = os.NewFile(uintptr(fd), "/dev/fuse")
+	se.SetDev(uintptr(fd))
 
 	// golang sets CLOEXEC on file descriptors when they are
 	// acquired through normal operations (e.g. open).

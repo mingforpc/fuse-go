@@ -12,11 +12,14 @@ import (
 // The loop to read/write '/dev/fuse'
 func (se *FuseSession) FuseLoop() {
 
+	if !se.IsInited() {
+		panic(kernel.NotInit)
+	}
+
 	se.Running = true
 
-	se.readChan = make(chan []byte, 1024)
-	se.writeChan = make(chan []byte, 1024)
-
+	se.readChan = make(chan []byte, se.maxGoro)
+	se.writeChan = make(chan []byte, se.maxGoro)
 	se.closeCh = make(chan interface{})
 
 	// Write goroutine
@@ -129,7 +132,7 @@ func (se *FuseSession) writeGoro() {
 
 func (se *FuseSession) Close() {
 	se.Running = false
-	se.Dev.Close()
+	se.dev.Close()
 
 	close(se.closeCh)
 	close(se.writeChan)
@@ -138,9 +141,9 @@ func (se *FuseSession) Close() {
 
 // Read event from '/dev/fuse'
 func (se *FuseSession) readCmd() ([]byte, error) {
-	var cmdLenBytes = make([]byte, se.Bufsize)
+	var cmdLenBytes = make([]byte, se.bufsize)
 
-	n, err := se.Dev.Read(cmdLenBytes)
+	n, err := se.dev.Read(cmdLenBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +174,7 @@ func (se *FuseSession) writeCmd(resp []byte) error {
 	if se.Debug {
 		log.Trace.Printf("resp[%+v] \n", resp)
 	}
-	_, err := se.Dev.Write(resp)
+	_, err := se.dev.Write(resp)
 
 	return err
 }

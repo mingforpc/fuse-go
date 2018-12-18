@@ -6,6 +6,7 @@ import (
 
 var DataLenErr = errors.New("Data len not enough")
 var NoNeedReplyErr = errors.New("No need to reply")
+var NotInit = errors.New("Fuse session not inited")
 
 /** Version number of this interface */
 const FUSE_KERNEL_VERSION = 7

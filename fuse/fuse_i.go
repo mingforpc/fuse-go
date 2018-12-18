@@ -66,13 +66,15 @@ type FuseConnInfo struct {
 type FuseSession struct {
 	Mountpoint string
 
-	Dev *os.File
+	dev *os.File // "dev/fuse"
 
-	GotInit bool
+	inited bool // is inited or not
 
-	Bufsize int
+	bufsize int // read buffser size (/dev/fuse)
 
-	ConnInfo *FuseConnInfo
+	maxGoro int // max goroutine num
+
+	connInfo *FuseConnInfo
 
 	FuseConfig *FuseConfig
 
@@ -88,20 +90,38 @@ type FuseSession struct {
 	closeCh chan interface{}
 }
 
-func (se *FuseSession) Init(mountpoint string, opts *FuseOpt) {
+func NewFuseSession(mountpoint string, opts *FuseOpt, maxGoro int) *FuseSession {
+
+	se := &FuseSession{}
+	se.Init(mountpoint, opts, maxGoro)
+
+	return se
+}
+
+func (se *FuseSession) Init(mountpoint string, opts *FuseOpt, maxGoro int) {
 
 	se.Mountpoint = mountpoint
 
-	se.Bufsize = KERNEL_BUF_PAGES*syscall.Getpagesize() + HEADER_SIZE
+	se.bufsize = KERNEL_BUF_PAGES*syscall.Getpagesize() + HEADER_SIZE
 	se.Opts = opts
+	se.maxGoro = maxGoro
 
-	se.ConnInfo = &FuseConnInfo{}
+	se.connInfo = &FuseConnInfo{}
 
-	se.ConnInfo.TimeGran = 1
+	se.connInfo.TimeGran = 1
 
 	se.FuseConfig = &FuseConfig{}
 	se.FuseConfig.Init()
 
+	se.inited = true
+}
+
+func (se *FuseSession) IsInited() bool {
+	return se.inited
+}
+
+func (se *FuseSession) SetDev(fd uintptr) {
+	se.dev = os.NewFile(fd, "/dev/fuse")
 }
 
 type FuseReq struct {
