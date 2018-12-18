@@ -2,7 +2,6 @@ package fuse
 
 import (
 	"os"
-	"sync"
 	"syscall"
 	"time"
 
@@ -86,7 +85,7 @@ type FuseSession struct {
 	readChan  chan []byte
 	writeChan chan []byte
 
-	wait sync.WaitGroup
+	closeCh chan interface{}
 }
 
 func (se *FuseSession) Init(mountpoint string, opts *FuseOpt) {

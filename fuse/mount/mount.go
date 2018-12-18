@@ -127,7 +127,7 @@ func Unmount(mountPoint string) (err error) {
 		return err
 	}
 	errBuf := bytes.Buffer{}
-	cmd := exec.Command(bin, "-u", mountPoint)
+	cmd := exec.Command(bin, "-uz", mountPoint)
 	cmd.Stderr = &errBuf
 	err = cmd.Run()
 	if errBuf.Len() > 0 {

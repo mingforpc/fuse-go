@@ -17,65 +17,21 @@ func (se *FuseSession) FuseLoop() {
 	se.readChan = make(chan []byte, 1024)
 	se.writeChan = make(chan []byte, 1024)
 
+	se.closeCh = make(chan interface{})
+
 	// Write goroutine
 	// 用来写"/dev/fuse"的goroutine
-	go func() {
-
-		for true {
-
-			res, ok := <-se.writeChan
-
-			if !ok {
-				break
-			}
-
-			if se.Running {
-				err := se.writeCmd(res)
-				if err != nil {
-					log.Error.Println(err)
-				}
-			}
-
-		}
-
-	}()
+	go se.writeGoro()
 
 	// Read goroutine
 	// 用来读取"/dev/fuse"的goroutine
-	go func() {
+	go se.readGoro()
 
-		defer func() {
-			if err := recover(); err != nil {
-				log.Error.Printf("Read goroutine error[%s] \n", err)
-			}
-		}()
-
-		for se.Running {
-
-			breq, err := se.readCmd()
-			if err != nil {
-
-				log.Error.Println(err)
-				// 读出错退出
-				se.Close()
-				break
-			}
-
-			// Read 可能block很久，所以再判断一次
-			if se.Running {
-				se.readChan <- breq
-			}
-
-		}
-
-	}()
-
-	for true {
+	for se.Running {
 
 		brep, ok := <-se.readChan
 
 		if !ok {
-
 			break
 		}
 
@@ -93,14 +49,11 @@ func (se *FuseSession) FuseLoop() {
 		// 用来处理各个请求的goroutine
 		go func() {
 
-			se.wait.Add(1)
-
 			defer func() {
 				if err := recover(); err != nil {
 					log.Error.Printf("Distribute goroutine error[%s] \n", err)
 				}
 
-				se.wait.Done()
 			}()
 
 			res, err := distribute(&req, inheader, buf)
@@ -113,7 +66,12 @@ func (se *FuseSession) FuseLoop() {
 			if err != nil {
 				log.Error.Println(err)
 			} else {
-				se.writeChan <- res
+				select {
+				case <-se.closeCh:
+					return
+				case se.writeChan <- res:
+				}
+
 			}
 		}()
 
@@ -121,14 +79,61 @@ func (se *FuseSession) FuseLoop() {
 
 }
 
-func (se *FuseSession) Close() {
-	se.Running = false
+func (se *FuseSession) readGoro() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error.Printf("Read goroutine error[%s] \n", err)
+		}
+	}()
 
-	se.wait.Wait()
+	for se.Running {
+
+		breq, err := se.readCmd()
+		if err != nil {
+
+			log.Error.Println(err)
+			// 读出错退出
+
+			break
+		}
+
+		// Read 可能block很久，所以再判断一次
+		if se.Running {
+			se.readChan <- breq
+		}
+	}
 
 	close(se.readChan)
-	close(se.writeChan)
+
+}
+
+func (se *FuseSession) writeGoro() {
+	for se.Running {
+
+		res, ok := <-se.writeChan
+
+		if !ok {
+			break
+		}
+
+		if se.Running {
+			err := se.writeCmd(res)
+			if err != nil {
+				log.Error.Println(err)
+			}
+		}
+
+	}
+
+}
+
+func (se *FuseSession) Close() {
+	se.Running = false
 	se.Dev.Close()
+
+	close(se.closeCh)
+	close(se.writeChan)
+
 }
 
 // Read event from '/dev/fuse'
