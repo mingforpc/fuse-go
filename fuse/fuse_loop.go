@@ -69,6 +69,7 @@ func (se *FuseSession) FuseLoop() {
 			if err != nil {
 				log.Error.Println(err)
 			} else {
+				// Avoid srive closed channel
 				select {
 				case <-se.closeCh:
 					return
@@ -197,14 +198,16 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		req.Arg = &arg
 		var initOut = kernel.FuseInitOut{}
 
-		errnum = doInit(*req, inHeader.Nodeid, &initOut)
+		errnum = doInit(*req, &initOut)
 
 		resp = initOut
 
 	case kernel.FUSE_DESTROY:
 		// Destory event
 
-		errnum = doDestory(*req, inHeader.Nodeid)
+		doDestory(*req)
+
+		noreply = true
 
 	case kernel.FUSE_FORGET:
 		// Forget event

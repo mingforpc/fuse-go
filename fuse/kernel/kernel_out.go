@@ -141,6 +141,7 @@ func fuseDirentAlign(entlent uint64) uint64 {
 	return (entlent + 8 - 1) & (^uint64(7))
 }
 
+// ToBinary将FuseDirent转为二进制数据, preOff是在list里面，上一个的偏移量
 func (dirent *FuseDirent) ToBinary(preOff *uint64) ([]byte, error) {
 
 	entLen := fuseDirentAlign(DIRENT_NAME_OFFSET + uint64(dirent.NameLen))

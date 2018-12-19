@@ -88,6 +88,8 @@ type FuseSession struct {
 	writeChan chan []byte
 
 	closeCh chan interface{}
+
+	userdata interface{} // user data
 }
 
 func NewFuseSession(mountpoint string, opts *FuseOpt, maxGoro int) *FuseSession {

@@ -7,26 +7,57 @@ import (
 )
 
 type FuseOpt struct {
-
 	/**
-	 * Clean up filesystem.
+	 * Init
+	 * Initialize filesystem
 	 *
-	 * Called on filesystem exit. When this method is called, the
-	 * connection to the kernel may be gone already, so that eg. calls
-	 * to fuse_lowlevel_notify_* will fail.
+	 * This function is called when libfuse establishes
+	 * communication with the FUSE kernel module. The file system
+	 * should use this module to inspect and/or modify the
+	 * connection parameters provided in the `conn` structure.
+	 *
+	 * Note that some parameters may be overwritten by options
+	 * passed to fuse_session_new() which take precedence over the
+	 * values set in this handler.
 	 *
 	 * There's no reply to this function
 	 *
+	 * conn: The fuse connection info
+	 * userdata: userdata saved to session
+	 *
+	 * Fuse的初始化函数
+	 * conn: 是与内核fuse协商的信息，如有需要直接修改
+	 * userdata: 是应用需要保存的数据，不需要直接返回nil即可
 	 */
-	Destory *func(req FuseReq, nodeid uint64) (res int32)
+	Init *func(conn *FuseConnInfo) (userdata interface{})
+
+	/**
+	* Destory
+	* Clean up filesystem.
+	*
+	* Called on filesystem exit. When this method is called, the
+	* connection to the kernel may be gone already, so that eg. calls
+	* to fuse_lowlevel_notify_* will fail.
+	*
+	* There's no reply to this function
+	*
+	* userdata: The userdata saved in Init
+	*
+	* 该接口并不是FUSE应用退出时调用的程序，而是当挂载的文件系统的superblock关闭或者出错时，才触发的
+	* userdata: 在Init中保存的应用数据
+	 */
+	Destory *func(userdata interface{})
 
 	/**
 	 * Look up a directory entry by name and get its attributes.
 	 *
-	 * @param req request handle
-	 * @param parent inode number of the parent directory
-	 * @param name the name to look up
-	 * @param stat the file stat to return
+	 * req: request handle
+	 * parentId: parent inode number of the parent directory
+	 * name: the name to look up
+	 * fsStat: the file stat to return
+	 * res: the errno to fs
+	 *
+	 * 根据文件名获取文件的属性
 	 */
 	Lookup *func(req FuseReq, parentId uint64, name string) (fsStat *FuseStat, res int32)
 
@@ -60,11 +91,11 @@ type FuseOpt struct {
 	 * inodes.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param nlookup the number of lookups to forget
+	 * req: request handle
+	 * nodeId: the inode number
+	 * nlookup: the number of lookups to forget
 	 */
-	Forget *func(req FuseReq, nodeId uint64, nlookup uint64)
+	Forget *func(req FuseReq, nodeid uint64, nlookup uint64)
 
 	/**
 	 * Get file attributes.
@@ -78,9 +109,10 @@ type FuseOpt struct {
 	 * will be ignored.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param stat the file stat
+	 * req: request handle
+	 * nodeid: the inode number
+	 * fsStat: stat the file stat
+	 * res: the errno to fs
 	 */
 	Getattr *func(req FuseReq, nodeid uint64) (fsStat *FuseStat, res int32)
 
@@ -103,10 +135,11 @@ type FuseOpt struct {
 	 * parameter will be NULL.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param attr the attributes
-	 * @param to_set bit mask of attributes which should be set
+	 * req: request handle
+	 * nodeid: the inode number
+	 * attr: the attributes
+	 * toSet: bit mask of attributes which should be set
+	 * res: the errno to fs
 	 */
 	Setattr *func(req FuseReq, nodeid uint64, attr FuseStat, toSet uint32) (res int32)
 
@@ -114,8 +147,10 @@ type FuseOpt struct {
 	 * Read symbolic link
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
+	 * req: request handle
+	 * nodeid: the inode number
+	 * path: the contents of the symbolic link
+	 * res: the errno to fs. About readlink, please check [http://man7.org/linux/man-pages/man2/readlink.2.html]
 	 */
 	Readlink *func(req FuseReq, nodeid uint64) (path string, res int32)
 
@@ -126,14 +161,13 @@ type FuseOpt struct {
 	 * socket node.
 	 *
 	 *
-	 * @param req request handle
-	 * @param parent inode number of the parent directory
-	 * @param name to create
-	 * @param mode file type and mode with which to create the new file
-	 * @param rdev the device number (only valid if created file is a device)
-	 * @param nodeid the file id
-	 * @param generation the file generation id
-	 * @param stat the file stat
+	 * req: request handle
+	 * parentid: inode number of the parent directory
+	 * name: to create
+	 * mode: file type and mode with which to create the new file
+	 * rdev: the device number (only valid if created file is a device)
+	 * fsStat: the file stat
+	 * res: the errno to fs. About mknod, please check [http://man7.org/linux/man-pages/man2/mknod.2.html]
 	 */
 	Mknod *func(req FuseReq, parentid uint64, name string, mode uint32, rdev uint32) (fsStat *FuseStat, res int32)
 
@@ -141,10 +175,12 @@ type FuseOpt struct {
 	 * Create a directory
 	 *
 	 *
-	 * @param req request handle
-	 * @param parent inode number of the parent directory
-	 * @param name to create
-	 * @param mode with which to create the new file
+	 * req: request handle
+	 * parentid: inode number of the parent directory
+	 * name: to create
+	 * mode: with which to create the new file
+	 * fsStat: the file stat
+	 * res: the errno to fs. About mkdir, please check [http://man7.org/linux/man-pages/man2/mkdir.2.html]
 	 */
 	Mkdir *func(req FuseReq, parentid uint64, name string, mode uint32) (fsStat *FuseStat, res int32)
 
@@ -157,9 +193,10 @@ type FuseOpt struct {
 	 * of the forget function).
 	 *
 	 *
-	 * @param req request handle
-	 * @param parent inode number of the parent directory
-	 * @param name to remove
+	 * req: request handle
+	 * parentid: inode number of the parent directory
+	 * name: to remove
+	 * res: the errno to fs. About unlink, please check [http://man7.org/linux/man-pages/man2/unlink.2.html]
 	 */
 	Unlink *func(req FuseReq, parentid uint64, name string) (res int32)
 
@@ -171,9 +208,10 @@ type FuseOpt struct {
 	 * inode until the lookup count reaches zero (see description
 	 * of the forget function).
 	 *
-	 * @param req request handle
-	 * @param parent inode number of the parent directory
-	 * @param name to remove
+	 * req: request handle
+	 * parentid: inode number of the parent directory
+	 * name: to remove
+	 * res: the errno to fs. About rmdir, please check [http://man7.org/linux/man-pages/man2/rmdir.2.html]
 	 */
 	Rmdir *func(req FuseReq, parentid uint64, name string) (res int32)
 
@@ -181,10 +219,12 @@ type FuseOpt struct {
 	 * Create a symbolic link
 	 *
 	 *
-	 * @param req request handle
-	 * @param link the contents of the symbolic link
-	 * @param parent inode number of the parent directory
-	 * @param name to create
+	 * req: request handle
+	 * parentid: inode number of the parent directory
+	 * link: the contents of the symbolic link
+	 * name: to create
+	 * fsStat: the file stat
+	 * res: the errno to fs. About symlink, please check[http://man7.org/linux/man-pages/man2/symlink.2.html]
 	 */
 	Symlink *func(req FuseReq, parentid uint64, link string, name string) (fsStat *FuseStat, res int32)
 
@@ -209,11 +249,12 @@ type FuseOpt struct {
 	 * exist and neither may be deleted.
 	 *
 	 *
-	 * @param req request handle
-	 * @param parent inode number of the old parent directory
-	 * @param name old name
-	 * @param newparent inode number of the new parent directory
-	 * @param newname new name
+	 * req: request handle
+	 * parentid: inode number of the old parent directory
+	 * name: old name
+	 * newparentid: inode number of the new parent directory
+	 * newname: new name
+	 * res: the errno to fs. About rename, please check[http://man7.org/linux/man-pages/man2/rename.2.html]
 	 */
 	Rename *func(req FuseReq, parentid uint64, name string, newparentid uint64, newname string) (res int32)
 
@@ -221,10 +262,12 @@ type FuseOpt struct {
 	 * Create a hard link
 	 *
 	 *
-	 * @param req request handle
-	 * @param oldnodeid the old inode number
-	 * @param newparent inode number of the new parent directory
-	 * @param newname new name to create
+	 * req: request handle
+	 * oldnodeid: the old inode number
+	 * newparentid: inode number of the new parent directory
+	 * newname: new name to create
+	 * fsStat: the new file stat
+	 * res: the errno to fs. About link, please check[http://man7.org/linux/man-pages/man2/link.2.html]
 	 */
 	Link *func(req FuseReq, oldnodeid uint64, newparentid uint64, newname string) (fsStat *FuseStat, res int32)
 
@@ -277,9 +320,10 @@ type FuseOpt struct {
 	* to the filesystem process.
 	*
 	*
-	* @param req request handle
-	* @param ino the inode number
-	* @param fi file information
+	* req: request handle
+	* nodeid: the inode number
+	* fi: file information
+	* res: the errno to fs. About open, please check[http://man7.org/linux/man-pages/man2/open.2.html]
 	*/
 	Open *func(req FuseReq, nodeid uint64, fi *FuseFileInfo) (res int32)
 
@@ -297,11 +341,13 @@ type FuseOpt struct {
 	 * be undefined if the open method didn't set any value.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param size number of bytes to read
-	 * @param off offset to read from
-	 * @param fi file information
+	 * req: request handle
+	 * nodeid: the inode number
+	 * size: number of bytes to read
+	 * offset: offset to read from
+	 * fi: file information
+	 * content: the content to read
+	 * res: the errno to fs. About read, please check[http://man7.org/linux/man-pages/man2/read.2.html]
 	 */
 	Read *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (content []byte, res int32)
 
@@ -321,12 +367,13 @@ type FuseOpt struct {
 	 * be undefined if the open method didn't set any value.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param buf data to write
-	 * @param size number of bytes to write
-	 * @param off offset to write to
-	 * @param fi file information
+	 * req: request handle
+	 * nodeid: the inode number
+	 * buf: data to write
+	 * offset: offset to write to
+	 * fi: file information
+	 * size: the size write to file
+	 * res: the errno to fs. About write, please check[http://man7.org/linux/man-pages/man2/write.2.html]
 	 */
 	Write *func(req FuseReq, nodeid uint64, buf []byte, offset uint64, fi FuseFileInfo) (size uint32, res int32)
 
@@ -358,9 +405,10 @@ type FuseOpt struct {
 	 * process.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param fi file information
+	 * req: request handle
+	 * nodeid: the inode number
+	 * fi: file information
+	 * res: the errno to fs. About flush, please check[http://man7.org/linux/man-pages/man3/fflush.3.html](may be not correct)
 	 */
 	Flush *func(req FuseReq, nodeid uint64, fi FuseFileInfo) (res int32)
 
@@ -376,10 +424,11 @@ type FuseOpt struct {
 	 * process.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param datasync flag indicating if only data should be flushed
-	 * @param fi file information
+	 * req: request handle
+	 * nodeid: the inode number
+	 * datasync: flag indicating if only data should be flushed
+	 * fi: file information
+	 * res: the errno to fs. About fsync, please check[http://man7.org/linux/man-pages/man2/fsync.2.html]
 	 */
 	Fsync *func(req FuseReq, nodeid uint64, datasync uint32, fi FuseFileInfo) (res int32)
 
@@ -397,9 +446,10 @@ type FuseOpt struct {
 	 * and releasedir.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param fi file information
+	 * req: request handle
+	 * nodeid: the inode number
+	 * fi: file information
+	 * res: the errno to fs. About opendir, please check[http://man7.org/linux/man-pages/man3/opendir.3.html]
 	 */
 	Opendir *func(req FuseReq, nodeid uint64, fi *FuseFileInfo) (res int32)
 
@@ -420,11 +470,14 @@ type FuseOpt struct {
 	 * entries, but is allowed to do so.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param size maximum number of bytes to send
-	 * @param off offset to continue reading the directory stream
-	 * @param fi file information
+	 * req: request handle
+	 * nodeid: the inode number
+	 * size: maximum number of bytes to send
+	 * offset: offset to continue reading the directory stream
+	 * fi: file information
+	 * direntList: list of file in this directory, the binary size of direntList should not larget than size.
+	 * res: the errno to fs. About readdir, please check[http://man7.org/linux/man-pages/man3/readdir.3.html]
+	 *
 	 */
 	Readdir *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (direntList []kernel.FuseDirent, res int32)
 
@@ -438,9 +491,10 @@ type FuseOpt struct {
 	 * will be undefined if the opendir method didn't set any value.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param fi file information
+	 * req: request handle
+	 * nodeid: the inode number
+	 * fi: file information
+	 * res: the errno to fs.
 	 */
 	Releasedir *func(req FuseReq, nodeid uint64, fi FuseFileInfo) (res int32)
 
@@ -461,12 +515,11 @@ type FuseOpt struct {
 	 * be undefined if the open method didn't set any value.
 	 * fi->flags will contain the same flags as for open.
 	 *
-	 * Valid replies:
-	 *   fuse_reply_err
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param fi file information
+	 * req: request handle
+	 * nodeid: the inode number
+	 * fi: file information
+	 * res: the errno to fs.
 	 */
 	Release *func(req FuseReq, nodeid uint64, fi FuseFileInfo) (res int32)
 
@@ -485,10 +538,11 @@ type FuseOpt struct {
 	 * process.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param datasync flag indicating if only data should be flushed
-	 * @param fi file information
+	 * req: request handle
+	 * nodeid: the inode number
+	 * datasync: flag indicating if only data should be flushed
+	 * fi: file information.
+	 * res: the errno to fs. About fsyncdir, please check[http://man7.org/linux/man-pages/man2/fsync.2.html]
 	 */
 	Fsyncdir *func(req FuseReq, nodeid uint64, datasync uint32, fi FuseFileInfo) (res int32)
 
@@ -496,8 +550,10 @@ type FuseOpt struct {
 	 * Get file system statistics
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number, zero means "undefined"
+	 * req: request handle
+	 * nodeid: the inode number, zero means "undefined"
+	 * statfs: stat of file system
+	 * res: the errno to fs. About fsyncdir, please check[http://man7.org/linux/man-pages/man2/fstatfs.2.html]
 	 */
 	Statfs *func(req FuseReq, nodeid uint64) (statfs *kernel.FuseStatfs, res int32)
 
@@ -509,6 +565,12 @@ type FuseOpt struct {
 	 * future setxattr() requests will fail with EOPNOTSUPP without being
 	 * send to the filesystem process.
 	 *
+	 * req: request handle
+	 * nodeid: the inode number, zero means "undefined"
+	 * name: name of attribute
+	 * value: value of attribute
+	 * flags: setxattr flags
+	 * res: the errno to fs. About setxattr, pease check[http://man7.org/linux/man-pages/man2/fsetxattr.2.html]
 	 */
 	Setxattr *func(req FuseReq, nodeid uint64, name string, value string, flags uint32) (res int32)
 
@@ -530,12 +592,14 @@ type FuseOpt struct {
 	 * send to the filesystem process.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param name of the extended attribute
-	 * @param size maximum size of the value to send
+	 * req: request handle
+	 * nodeid: the inode number
+	 * name: name of the extended attribute
+	 * size: maximum size of the value to send
+	 * value: value of the extended attribute
+	 * res: the errno to fs. About getxattr, pease check[http://man7.org/linux/man-pages/man2/fgetxattr.2.html]
 	 */
-	Getxattr *func(req FuseReq, nodeid uint64, name string, size uint32) (value string, err int32)
+	Getxattr *func(req FuseReq, nodeid uint64, name string, size uint32) (value string, res int32)
 
 	/**
 	 * List extended attribute names
@@ -556,11 +620,13 @@ type FuseOpt struct {
 	 * send to the filesystem process.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param size maximum size of the list to send
+	 * req: request handle
+	 * nodeid: the inode number
+	 * size: maximum size of the list to send
+	 * list: the extended attributes names string, eatch name use '\0' to split it
+	 * res: the errno to fs. About getxattr, pease check[http://man7.org/linux/man-pages/man2/flistxattr.2.html]
 	 */
-	Listxattr *func(req FuseReq, nodeid uint64, size uint32) (list string, err int32)
+	Listxattr *func(req FuseReq, nodeid uint64, size uint32) (list string, res int32)
 
 	/**
 	 * Remove an extended attribute
@@ -571,9 +637,10 @@ type FuseOpt struct {
 	 * send to the filesystem process.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param name of the extended attribute
+	 * req: request handle
+	 * nodeid: the inode number
+	 * name: name of the extended attribute
+	 * res: the errno to fs. About removexattr, pease check[http://man7.org/linux/man-pages/man2/removexattr.2.html]
 	 */
 	Removexattr *func(req FuseReq, nodeid uint64, name string) (res int32)
 
@@ -591,9 +658,10 @@ type FuseOpt struct {
 	 * requests will succeed without being send to the filesystem process.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param mask requested access mode
+	 * req: request handle
+	 * nodeid: the inode number
+	 * mask: requested access mode
+	 * res: the errno to fs. About access, pease check[http://man7.org/linux/man-pages/man2/access.2.html]
 	 */
 	Access *func(req FuseReq, nodeid uint64, mask uint32) (res int32)
 
@@ -615,11 +683,13 @@ type FuseOpt struct {
 	 * mknod() and open() handlers will be called instead).
 	 *
 	 *
-	 * @param req request handle
-	 * @param parent inode number of the parent directory
-	 * @param name to create
-	 * @param mode file type and mode with which to create the new file
-	 * @param fi file information, 用来设置Open的操作
+	 * req: request handle
+	 * parentid: inode number of the parent directory
+	 * name: to create
+	 * mode: file type and mode with which to create the new file
+	 * fi: file information, use to control open process
+	 * fsStat: file stat
+	 * res: the errno to fs.
 	 */
 	Create *func(req FuseReq, parentid uint64, name string, mode uint32, fi *FuseFileInfo) (fsStat *FuseStat, res int32)
 
@@ -627,10 +697,11 @@ type FuseOpt struct {
 	 * Test for a POSIX file lock
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param fi file information
-	 * @param lock the region/type to test
+	 * req: request handle
+	 * nodeid: the inode number
+	 * fi: file information
+	 * lock: the region/type to test
+	 * res: the errno to fs. About getlk, please check [http://man7.org/linux/man-pages/man3/lockf.3.html]
 	 */
 	Getlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock *syscall.Flock_t) (res int32)
 
@@ -648,11 +719,12 @@ type FuseOpt struct {
 	 * only interesting for network filesystems and similar.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param fi file information
-	 * @param lock the region/type to set
-	 * @param sleep locking operation may sleep
+	 * req: request handle
+	 * nodeid: the inode number
+	 * fi: file information
+	 * lock: the region/type to set
+	 * sleep: locking operation may sleep
+	 * res: the errno to fs. About setlk, please check [http://man7.org/linux/man-pages/man3/lockf.3.html]
 	 */
 	Setlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock syscall.Flock_t, lksleep int) (res int32)
 
@@ -668,10 +740,11 @@ type FuseOpt struct {
 	 * process.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param blocksize unit of block index
-	 * @param idx block index within file
+	 * req: request handle
+	 * nodeid: the inode number
+	 * blocksize: unit of block index
+	 * idx: block index within file
+	 * res: the errno to fs.
 	 */
 	Bmap *func(req FuseReq, nodeid uint64, blocksize uint32, idx *uint64) (res int32)
 
@@ -685,15 +758,15 @@ type FuseOpt struct {
 	 * according to the information encoded in cmd.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param cmd ioctl command
-	 * @param arg ioctl argument
-	 * @param fi file information
-	 * @param flags for FUSE_IOCTL_* flags
-	 * @param in_buf data fetched from the caller
-	 * @param in_bufsz number of fetched bytes
-	 * @param out_bufsz maximum size of output data
+	 * req: request handle
+	 * nodeid: the inode number
+	 * cmd: ioctl command
+	 * arg: ioctl argument
+	 * fi: file information
+	 * inbuf: data fetched from the caller
+	 * outbufsz: maximum size of output data
+	 * ioctlOut: result to kernel
+	 * res: the errno to fs. About ioctl, please check[http://man7.org/linux/man-pages/man2/ioctl.2.html]
 	 */
 	Ioctl *func(req FuseReq, nodeid uint64, cmd uint32, arg uint64, fi FuseFileInfo, inbuf []byte, outbufsz uint32, ioctlOut *kernel.FuseIoctlOut) (res int32)
 
@@ -718,10 +791,12 @@ type FuseOpt struct {
 	 * to the filesystem process.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param fi file information
-	 * @param ph poll handle to be used for notification
+	 * req: request handle
+	 * nodeid: the inode number
+	 * fi: file information
+	 * ph: poll handle to be used for notification
+	 * revents: returned events
+	 * res: the errno to fs. About poll, please check[http://man7.org/linux/man-pages/man2/poll.2.html]
 	 */
 	Poll *func(req FuseReq, nodeid uint64, fi FuseFileInfo, ph *FusePollhandle) (revents uint32, res int32)
 
@@ -732,9 +807,10 @@ type FuseOpt struct {
 	 * information.
 	 *
 	 *
-	 * @param req request handle
+	 * req: request handle
+	 * nodeList: the node list to forget
 	 */
-	ForgetMulti *func(req FuseReq, count uint32, nodeList []kernel.FuseForgetOne)
+	ForgetMulti *func(req FuseReq, nodeList []kernel.FuseForgetOne)
 
 	/**
 	 * Allocate requested space. If this function returns success then
@@ -747,12 +823,14 @@ type FuseOpt struct {
 	 * send to the filesystem process.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param offset starting point for allocated region
-	 * @param length size of allocated region
-	 * @param mode determines the operation to be performed on the given range,
+	 * req: request handle
+	 * nodeid: the inode number
+	 * mode: determines the operation to be performed on the given range,
 	 *             see fallocate(2)
+	 * offset: starting point for allocated region
+	 * length: size of allocated region
+	 * fi: file information
+	 * res: the errno to fs. About fallocate, please check[http://man7.org/linux/man-pages/man2/fallocate.2.html]
 	 */
 	Fallocate *func(req FuseReq, nodeid uint64, mode uint32, offset uint64, length uint64, fi FuseFileInfo) (res int32)
 
@@ -771,11 +849,13 @@ type FuseOpt struct {
 	 * and "..", is incremented by one.
 	 *
 	 *
-	 * @param req request handle
-	 * @param ino the inode number
-	 * @param size maximum number of bytes to send
-	 * @param off offset to continue reading the directory stream
-	 * @param fi file information
+	 * req: request handle
+	 * nodeid: the inode number
+	 * size: maximum number of bytes to send
+	 * offset: offset to continue reading the directory stream
+	 * fi: file information
+	 * buf: result to kernel
+	 * res: the errno to fs. About readdirplus , please check[http://man7.org/linux/man-pages/man3/readdir.3.html]
 	 */
 	Readdirplus *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (buf []byte, res int32)
 

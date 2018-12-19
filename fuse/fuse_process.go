@@ -11,7 +11,7 @@ import (
 	"github.com/mingforpc/fuse-go/fuse/log"
 )
 
-func doInit(req FuseReq, nodeid uint64, initOut *kernel.FuseInitOut) int32 {
+func doInit(req FuseReq, initOut *kernel.FuseInitOut) int32 {
 
 	se := req.session
 	initIn := (*req.Arg).(kernel.FuseInitIn)
@@ -203,10 +203,16 @@ func doInit(req FuseReq, nodeid uint64, initOut *kernel.FuseInitOut) int32 {
 		initOut.Flags |= kernel.FUSE_POSIX_ACL
 	}
 
+	if se.Opts != nil && se.Opts.Init != nil {
+		userdata := (*se.Opts.Init)(se.connInfo)
+		se.userdata = userdata
+
+	}
+
 	return errno.SUCCESS
 }
 
-func doDestory(req FuseReq, nodeid uint64) int32 {
+func doDestory(req FuseReq) {
 	se := req.session
 
 	if se.Debug {
@@ -214,11 +220,8 @@ func doDestory(req FuseReq, nodeid uint64) int32 {
 	}
 
 	if se.Opts != nil && se.Opts.Destory != nil {
-		res := (*se.Opts.Destory)(req, nodeid)
+		(*se.Opts.Destory)(se.userdata)
 
-		return res
-	} else {
-		return errno.SUCCESS
 	}
 
 }
@@ -1204,7 +1207,7 @@ func doForgetMulti(req FuseReq) {
 	}
 
 	if se.Opts != nil && se.Opts.ForgetMulti != nil {
-		(*se.Opts.ForgetMulti)(req, batchForgetIn.Count, batchForgetIn.NodeList)
+		(*se.Opts.ForgetMulti)(req, batchForgetIn.NodeList)
 	} else if se.Opts != nil && se.Opts.Forget != nil {
 		for _, node := range batchForgetIn.NodeList {
 			(*se.Opts.Forget)(req, node.Nodeid, node.Nlookup)

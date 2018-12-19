@@ -33,3 +33,9 @@ Mount部分的代码，为了实现普通用户可以直接Mount，调用了`/bi
 ## 例子
 
 可以参考:[https://github.com/mingforpc/hadoop-fs](https://github.com/mingforpc/hadoop-fs)
+
+## TODO
+
+* 修改好注释和调整结构
+* 完成例子和测试
+* 实现一个高级接口
