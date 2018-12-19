@@ -236,3 +236,19 @@ type FuseStat struct {
 	Generation uint64
 	Stat       syscall.Stat_t
 }
+
+// The Dirent sturct provide to outside
+type FuseDirent kernel.FuseDirent
+
+// The FuseStatfs stuct provide to outside
+type FuseStatfs kernel.FuseStatfs
+
+// The FuseIoctlOut struct provide to outside
+type FuseIoctl kernel.FuseIoctlOut
+
+// The FuseForgetOne struct provide to outside
+type FuseForgetOne kernel.FuseForgetOne
+
+// The syscall.Flock_t struct provide to outside
+// This will make it easy if I want to change the struct of FuseFLock
+type FuseFlock syscall.Flock_t

@@ -732,7 +732,10 @@ func doReaddir(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 				var preOff uint64
 
 				for i, _ := range dirList {
-					dirb, _ := dirList[i].ToBinary(&preOff)
+
+					dirent := kernel.FuseDirent(dirList[i])
+
+					dirb, _ := dirent.ToBinary(&preOff)
 					// 判断是否超过readIn.Size的大小限制
 					if uint32(buf.Len()+len(dirb)) < readIn.Size {
 						buf.Write(dirb)
@@ -841,7 +844,7 @@ func doStatfs(req FuseReq, nodeid uint64, statfsOut *kernel.FuseStatfsOut) int32
 		statfs, res := (*se.Opts.Statfs)(req, nodeid)
 
 		if res == errno.SUCCESS {
-			statfsOut.St = *statfs
+			statfsOut.St = kernel.FuseStatfs(*statfs)
 
 		}
 
@@ -1014,7 +1017,7 @@ func doGetlk(req FuseReq, nodeid uint64, getlkOut *kernel.FuseLkOut) int32 {
 	if se.Opts != nil && se.Opts.Create != nil {
 
 		fi := NewFuseFileInfo()
-		var flock = syscall.Flock_t{}
+		var flock = FuseFlock{}
 
 		fi.Fh = getlkIn.Fh
 		fi.LockOwner = getlkIn.Owner
@@ -1052,7 +1055,7 @@ func doSetlkCommon(req FuseReq, nodeid uint64, lksleep int) int32 {
 		var res int32
 
 		fi := NewFuseFileInfo()
-		var flock = syscall.Flock_t{}
+		var flock = FuseFlock{}
 
 		fi.Fh = setlkIn.Fh
 		fi.LockOwner = setlkIn.Owner
@@ -1131,7 +1134,12 @@ func doIoctl(req FuseReq, nodeid uint64, ioctlOut *kernel.FuseIoctlOut) int32 {
 
 		fi := NewFuseFileInfo()
 
-		res := (*se.Opts.Ioctl)(req, nodeid, ioctlIn.Cmd, ioctlIn.Arg, fi, ioctlIn.InBuf, ioctlIn.OutSize, ioctlOut)
+		ioctl, res := (*se.Opts.Ioctl)(req, nodeid, ioctlIn.Cmd, ioctlIn.Arg, fi, ioctlIn.InBuf, ioctlIn.OutSize)
+
+		ioctlOut.Result = ioctl.Result
+		ioctlOut.Flags = ioctl.Flags
+		ioctlOut.InIovs = ioctl.InIovs
+		ioctlOut.OutIovs = ioctl.OutIovs
 
 		return res
 	} else {
@@ -1207,7 +1215,14 @@ func doForgetMulti(req FuseReq) {
 	}
 
 	if se.Opts != nil && se.Opts.ForgetMulti != nil {
-		(*se.Opts.ForgetMulti)(req, batchForgetIn.NodeList)
+
+		nodelist := make([]FuseForgetOne, batchForgetIn.Count)
+
+		for i, _ := range batchForgetIn.NodeList {
+			nodelist[i] = FuseForgetOne(batchForgetIn.NodeList[i])
+		}
+
+		(*se.Opts.ForgetMulti)(req, nodelist)
 	} else if se.Opts != nil && se.Opts.Forget != nil {
 		for _, node := range batchForgetIn.NodeList {
 			(*se.Opts.Forget)(req, node.Nodeid, node.Nlookup)
@@ -1258,7 +1273,7 @@ func doInterrupt(req FuseReq) {
 
 const OFFSET_MAX = 0x7fffffffffffffff
 
-func convertFuseFileLock(lock kernel.FuseFileLock, flock *syscall.Flock_t) {
+func convertFuseFileLock(lock kernel.FuseFileLock, flock *FuseFlock) {
 	flock.Type = int16(lock.Type)
 	flock.Whence = int16(os.SEEK_SET)
 	flock.Start = int64(lock.Start)
@@ -1270,7 +1285,7 @@ func convertFuseFileLock(lock kernel.FuseFileLock, flock *syscall.Flock_t) {
 	flock.Pid = int32(lock.Pid)
 }
 
-func setFuseLkOut(flock syscall.Flock_t, getlkOut *kernel.FuseLkOut) {
+func setFuseLkOut(flock FuseFlock, getlkOut *kernel.FuseLkOut) {
 	getlkOut.Lk.Type = uint32(flock.Type)
 	if flock.Type != syscall.F_UNLCK {
 		getlkOut.Lk.Start = uint64(flock.Start)

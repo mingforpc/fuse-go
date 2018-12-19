@@ -136,6 +136,7 @@ type FuseDirent struct {
 
 const DIRENT_NAME_OFFSET = 24
 
+// fuseDirentAlign用来保证长度是8的n次方
 func fuseDirentAlign(entlent uint64) uint64 {
 
 	return (entlent + 8 - 1) & (^uint64(7))

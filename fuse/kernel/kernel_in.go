@@ -635,6 +635,7 @@ func (poll *FusePollIn) ParseBinary(bcontent []byte) error {
 	return err
 }
 
+// The inode to fotget
 type FuseForgetOne struct {
 	Nodeid  uint64
 	Nlookup uint64

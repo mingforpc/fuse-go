@@ -1,11 +1,5 @@
 package fuse
 
-import (
-	"syscall"
-
-	"github.com/mingforpc/fuse-go/fuse/kernel"
-)
-
 type FuseOpt struct {
 	/**
 	 * Init
@@ -479,7 +473,7 @@ type FuseOpt struct {
 	 * res: the errno to fs. About readdir, please check[http://man7.org/linux/man-pages/man3/readdir.3.html]
 	 *
 	 */
-	Readdir *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (direntList []kernel.FuseDirent, res int32)
+	Readdir *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (direntList []FuseDirent, res int32)
 
 	/**
 	 * Release an open directory
@@ -555,7 +549,7 @@ type FuseOpt struct {
 	 * statfs: stat of file system
 	 * res: the errno to fs. About fsyncdir, please check[http://man7.org/linux/man-pages/man2/fstatfs.2.html]
 	 */
-	Statfs *func(req FuseReq, nodeid uint64) (statfs *kernel.FuseStatfs, res int32)
+	Statfs *func(req FuseReq, nodeid uint64) (statfs *FuseStatfs, res int32)
 
 	/**
 	 * Set an extended attribute
@@ -703,7 +697,7 @@ type FuseOpt struct {
 	 * lock: the region/type to test
 	 * res: the errno to fs. About getlk, please check [http://man7.org/linux/man-pages/man3/lockf.3.html]
 	 */
-	Getlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock *syscall.Flock_t) (res int32)
+	Getlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock *FuseFlock) (res int32)
 
 	/**
 	 * Acquire, modify or release a POSIX file lock
@@ -726,7 +720,7 @@ type FuseOpt struct {
 	 * sleep: locking operation may sleep
 	 * res: the errno to fs. About setlk, please check [http://man7.org/linux/man-pages/man3/lockf.3.html]
 	 */
-	Setlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock syscall.Flock_t, lksleep int) (res int32)
+	Setlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock FuseFlock, lksleep int) (res int32)
 
 	/**
 	 * Map block index within file to block index within device
@@ -765,10 +759,10 @@ type FuseOpt struct {
 	 * fi: file information
 	 * inbuf: data fetched from the caller
 	 * outbufsz: maximum size of output data
-	 * ioctlOut: result to kernel
+	 * ioctl: result to kernel
 	 * res: the errno to fs. About ioctl, please check[http://man7.org/linux/man-pages/man2/ioctl.2.html]
 	 */
-	Ioctl *func(req FuseReq, nodeid uint64, cmd uint32, arg uint64, fi FuseFileInfo, inbuf []byte, outbufsz uint32, ioctlOut *kernel.FuseIoctlOut) (res int32)
+	Ioctl *func(req FuseReq, nodeid uint64, cmd uint32, arg uint64, fi FuseFileInfo, inbuf []byte, outbufsz uint32) (ioctl FuseIoctl, res int32)
 
 	/**
 	 * Poll for IO readiness
@@ -810,7 +804,7 @@ type FuseOpt struct {
 	 * req: request handle
 	 * nodeList: the node list to forget
 	 */
-	ForgetMulti *func(req FuseReq, nodeList []kernel.FuseForgetOne)
+	ForgetMulti *func(req FuseReq, nodeList []FuseForgetOne)
 
 	/**
 	 * Allocate requested space. If this function returns success then
