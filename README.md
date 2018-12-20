@@ -9,6 +9,9 @@
 * `fuse.FuseSession`是启动和管理整个Fuse运行周期的结构体，所以这个类的实例是必须要有的。
 * `fuse.mount`中是挂载目录的函数封装，主要是`mount`和`umount`，具体实现其实是使用了`fusermount`的。
 * `fuse.FuseOpt`是保存用户实现的方法的结构体，然后将其传入`fuse.FuseSession`中。
+* `fuse.util`中目前提供了两工具类:
+    * `FusePathManager`是一个key: inode，val: filepath的字典
+    * `NotExistManager`是用来缓存那些文件路径不存在的，可以设置一个超时时间
 
 要实现的文件操作接口，可以查看[opt_h.go](./fuse/opt_h.go)，如果有些接口不需要实现，则直接不赋值(`nil`)即可。
 
@@ -34,24 +37,24 @@ var getattr = func(req fuse.FuseReq, nodeid uint64) (fsStat *fuse.FuseStat, resu
 func main() {
     ......
     opts := fuse.FuseOpt{}
-	opts.Getattr = &getattr
-	opts.Opendir = &opendir
-	opts.Readdir = &readdir
-	opts.Releasedir = &release
-	opts.Release = &release
-	opts.Lookup = &lookup
-	opts.Open = &open
-	opts.Read = &read
-	opts.Mkdir = &mkdir
-	opts.Create = &create
-	opts.Setattr = &setattr
-	opts.Write = &write
-	opts.Unlink = &unlink
-	opts.Rmdir = &rmdir
-	opts.Rename = &rename
-	opts.Setxattr = &setxattr
-	opts.Getxattr = &getxattr
-	opts.Listxattr = &listxattr
+    opts.Getattr = &getattr
+    opts.Opendir = &opendir
+    opts.Readdir = &readdir
+    opts.Releasedir = &release
+    opts.Release = &release
+    opts.Lookup = &lookup
+    opts.Open = &open
+    opts.Read = &read
+    opts.Mkdir = &mkdir
+    opts.Create = &create
+    opts.Setattr = &setattr
+    opts.Write = &write
+    opts.Unlink = &unlink
+    opts.Rmdir = &rmdir
+    opts.Rename = &rename
+    opts.Setxattr = &setxattr
+    opts.Getxattr = &getxattr
+    opts.Listxattr = &listxattr
     opts.Removexattr = &removexattr
     ......
 
