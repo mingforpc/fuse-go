@@ -1,16 +1,46 @@
 package errno
 
-const SUCCESS = 0
+// base errno
+const (
+	SUCCESS    = 0          /* Operation success */
+	EPERM      = -1         /* Operation not permitted */
+	ENOENT     = -2         /* No such file or directory */
+	ESRCH      = -3         /* No such process */
+	EINTR      = -4         /* Interrupted system call */
+	EIO        = -5         /* I/O error */
+	ENXIO      = -6         /* No such device or address */
+	E2BIG      = -7         /* Argument list too long */
+	ENOEXEC    = -8         /* Exec format error */
+	EBADF      = -9         /* Bad file number */
+	ECHILD     = -10        /* No child processes */
+	EAGAIN     = -11        /* Try again */
+	ENOMEM     = -12        /* Out of memory */
+	EACCES     = -13        /* Permission denied */
+	EFAULT     = -14        /* Bad address */
+	ENOTBLK    = -15        /* Block device required */
+	EBUSY      = -16        /* Device or resource busy */
+	EEXIST     = -17        /* File exists */
+	EXDEV      = -18        /* Cross-device link */
+	ENODEV     = -19        /* No such device */
+	ENOTDIR    = -20        /* Not a directory */
+	EISDIR     = -21        /* Is a directory */
+	EINVAL     = -22        /* Invalid argument */
+	ENFILE     = -23        /* File table overflow */
+	EMFILE     = -24        /* Too many open files */
+	ENOTTY     = -25        /* Not a typewriter */
+	ETXTBSY    = -26        /* Text file busy */
+	EFBIG      = -27        /* File too large */
+	ENOSPC     = -28        /* No space left on device */
+	ESPIPE     = -29        /* Illegal seek */
+	EROFS      = -30        /* Read-only file system */
+	EMLINK     = -31        /* Too many links */
+	EPIPE      = -32        /* Broken pipe */
+	EDOM       = -33        /* Math argument out of domain of func */
+	ERANGE     = -34        /* Math result not representable, in getxattr: The size of the value buffer is too small to hold the result. */
+	ENOSYS     = -38        /* Invalid system call number */
+	ENODATA    = -61        /* No data available */
+	ENOATTR    = ENODATA    /* XATTR_REPLACE was specified, and the attribute does not exist. */
+	EOPNOTSUPP = -95        /* Operation not supported on transport endpoint */
+	ENOTSUP    = EOPNOTSUPP /* setxattr: The namespace prefix of name is not valid. */
 
-const FAILED = -1
-const ENOENT = -2          /* No such file or directory */
-const EAGAIN = -11         /* Try again */
-const EACCES = -13         /* Permission denied */
-const EEXIST = -17         /* File exists */
-const ENOTDIR = 20         /* Not a directory */
-const ERANGE = -34         /* Math result not representable, in getxattr: The size of the value buffer is too small to hold the result. */
-const ENOSYS = -38         /* Invalid system call number */
-const ENODATA = -61        /* No data available */
-const ENOATTR = ENODATA    /* XATTR_REPLACE was specified, and the attribute does not exist. */
-const EOPNOTSUPP = -95     /* Operation not supported on transport endpoint */
-const ENOTSUP = EOPNOTSUPP /* setxattr: The namespace prefix of name is not valid. */
+)

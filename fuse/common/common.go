@@ -5,9 +5,15 @@ import (
 	"encoding/binary"
 )
 
-const UINT64_MAX = ^uint64(0)
-const UINT32_MAX = ^uint32(0)
+const (
+	// Uint64Max max value of uint64
+	Uint64Max = ^uint64(0)
 
+	// Uint32Max max vaalue of uint32
+	Uint32Max = ^uint32(0)
+)
+
+// ParseBinary parser binary from source to target
 func ParseBinary(source []byte, target interface{}) error {
 
 	err := binary.Read(bytes.NewBuffer(source), binary.LittleEndian, target)
@@ -18,6 +24,7 @@ func ParseBinary(source []byte, target interface{}) error {
 	return nil
 }
 
+// ToBinary parser source to binary
 func ToBinary(source interface{}) ([]byte, error) {
 	buf := bytes.NewBuffer(nil)
 
@@ -31,8 +38,8 @@ func ToBinary(source interface{}) ([]byte, error) {
 }
 
 func CalcTimeoutSec(t float64) uint64 {
-	if t > float64(UINT64_MAX) {
-		return UINT64_MAX
+	if t > float64(Uint64Max) {
+		return Uint64Max
 	} else if t < 0.0 {
 		return 0
 	} else {
@@ -42,7 +49,7 @@ func CalcTimeoutSec(t float64) uint64 {
 
 func CalcTimeoutNsec(t float64) uint32 {
 
-	var f float64 = t - float64(CalcTimeoutSec(t))
+	f := t - float64(CalcTimeoutSec(t))
 
 	if f < 0.0 {
 		return 0

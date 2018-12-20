@@ -88,11 +88,14 @@ Mount部分的代码，为了实现普通用户可以直接Mount，调用了`/bi
 
 [https://github.com/mingforpc/hadoop-fs](https://github.com/mingforpc/hadoop-fs)
 
-## TODO
+## TODO(按优先级排序)
 
+* `errno`中的错误代码需要完善(急)
 * 修改好注释和调整结构
+* 完成`example`中的例子
+* 往`test`中添加测试用例
+* 测试各个系统上的兼容性(目前只在64位Ubuntu上进行)
 * 提供一些管理`inode`和`path`的工具类
-* 完成例子和测试
 * 实现一个高级接口
 
 ## 联系我
