@@ -37,6 +37,8 @@ func ToBinary(source interface{}) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
+// CalcTimeoutSec Get the sec from t
+// the unit of t is second
 func CalcTimeoutSec(t float64) uint64 {
 	if t > float64(Uint64Max) {
 		return Uint64Max
@@ -47,6 +49,8 @@ func CalcTimeoutSec(t float64) uint64 {
 	}
 }
 
+// CalcTimeoutNsec Get the nsec from t
+// the unit of t is second
 func CalcTimeoutNsec(t float64) uint32 {
 
 	f := t - float64(CalcTimeoutSec(t))

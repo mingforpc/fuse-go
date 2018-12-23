@@ -119,7 +119,7 @@ func (mknod *FuseMknodIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 16 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent[0:4], &mknod.Mode)
@@ -145,7 +145,7 @@ func (mkdir *FuseMkdirIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 8 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent[0:4], &mkdir.Mode)
@@ -192,7 +192,7 @@ func (symlink *FuseSymlinkIn) ParseBinary(bcontent []byte) error {
 	array := bytes.Split(bcontent, []byte{0})
 
 	if len(array) < 2 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	symlink.Name = string(array[0])
@@ -215,7 +215,7 @@ func (rename *FuseRenameIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 8 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent[:8], &rename.NewDir)
@@ -227,7 +227,7 @@ func (rename *FuseRenameIn) ParseBinary(bcontent []byte) error {
 	array := bytes.Split(bcontent[8:], []byte{0})
 
 	if len(array) < 2 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	rename.OldName = string(array[0])
@@ -248,7 +248,7 @@ func (link *FuseLinkIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 8 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent[:8], &link.OldNodeid)
@@ -273,7 +273,7 @@ func (open *FuseOpenIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 8 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent, open)
@@ -297,7 +297,7 @@ func (read *FuseReadIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 40 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent, read)
@@ -323,7 +323,7 @@ func (write *FuseWriteIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 40 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent[0:8], &write.Fh)
@@ -352,7 +352,7 @@ func (release *FuseReleaseIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 24 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent, release)
@@ -372,7 +372,7 @@ func (fsync *FuseFsyncIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 16 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent, fsync)
@@ -394,7 +394,7 @@ func (setxattr *FuseSetxattrIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 8 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent[:4], &setxattr.Size)
@@ -403,7 +403,7 @@ func (setxattr *FuseSetxattrIn) ParseBinary(bcontent []byte) error {
 	array := bytes.Split(bcontent[8:], []byte{0})
 
 	if len(array) < 2 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	setxattr.Name = string(array[0])
@@ -425,7 +425,7 @@ func (getxattr *FuseGetxattrIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 8 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent[:4], &getxattr.Size)
@@ -466,7 +466,7 @@ func (flush *FuseFlushIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 24 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent, flush)
@@ -488,7 +488,7 @@ func (lk *FuseLkIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 48 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent, lk)
@@ -507,7 +507,7 @@ func (access *FuseAccessIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 8 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent, access)
@@ -530,7 +530,7 @@ func (create *FuseCreateIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 16 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent[:4], &create.Flags)
@@ -554,7 +554,7 @@ func (interrupt *FuseInterruptIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 8 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent, interrupt)
@@ -574,7 +574,7 @@ func (bmap *FuseBmapIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 16 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent, bmap)
@@ -599,7 +599,7 @@ func (ioctl *FuseIoctlIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 32 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent[:8], &ioctl.Fh)
@@ -627,7 +627,7 @@ func (poll *FusePollIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 24 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent, poll)
@@ -654,7 +654,7 @@ func (forget *FuseBatchForgetIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 8 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent[4:8], &forget.Dummy)
@@ -685,7 +685,7 @@ func (fallocate *FuseFallocateIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 32 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent, fallocate)
@@ -708,7 +708,7 @@ func (rename *FuseRename2In) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 16 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	common.ParseBinary(bcontent[:8], &rename.NewDir)
@@ -718,7 +718,7 @@ func (rename *FuseRename2In) ParseBinary(bcontent []byte) error {
 	array := bytes.Split(bcontent[16:], []byte{0})
 
 	if len(array) < 2 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	rename.OldName = string(array[0])
@@ -740,7 +740,7 @@ func (lseek *FuseLseekIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 24 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent, lseek)
@@ -761,7 +761,7 @@ func (cuseInit *CuseInitIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
 	if length < 16 {
-		return DataLenErr
+		return ErrDataLen
 	}
 
 	err := common.ParseBinary(bcontent, cuseInit)

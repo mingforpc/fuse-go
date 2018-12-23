@@ -13,7 +13,7 @@ import (
 func (se *FuseSession) FuseLoop() {
 
 	if !se.IsInited() {
-		panic(kernel.NotInit)
+		panic(kernel.ErrNotInit)
 	}
 
 	se.Running = true
@@ -61,7 +61,7 @@ func (se *FuseSession) FuseLoop() {
 
 			res, err := distribute(&req, inheader, buf)
 
-			if err == kernel.NoNeedReplyErr {
+			if err == kernel.ErrNoNeedReply {
 				// This request no need to reply
 				return
 			}
@@ -675,7 +675,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	if noreply {
 		// means this request no need to reply
 		bresp = nil
-		err = kernel.NoNeedReplyErr
+		err = kernel.ErrNoNeedReply
 	} else {
 
 		outHeader := kernel.FuseOutHeader{}
