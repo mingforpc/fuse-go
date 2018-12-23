@@ -190,7 +190,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 	var noreply = false
 
 	switch inHeader.Opcode {
-	case kernel.FUSE_INIT:
+	case kernel.FuseOpInit:
 		// Init event
 		var initIn = kernel.FuseInitIn{}
 		initIn.ParseBinary(bcontent)
@@ -202,14 +202,14 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = initOut
 
-	case kernel.FUSE_DESTROY:
+	case kernel.FuseOpDestory:
 		// Destory event
 
 		doDestory(*req)
 
 		noreply = true
 
-	case kernel.FUSE_FORGET:
+	case kernel.FuseOpForget:
 		// Forget event
 		var fotgetIn = kernel.FuseForgetIn{}
 		fotgetIn.ParseBinary(bcontent)
@@ -220,7 +220,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		noreply = true
 
-	case kernel.FUSE_LOOKUP:
+	case kernel.FuseOpLookup:
 		// lookup event
 		var lookupIn = kernel.FuseLookupIn{}
 		lookupIn.ParseBinary(bcontent)
@@ -233,7 +233,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = entryOut
 
-	case kernel.FUSE_GETATTR:
+	case kernel.FuseOpGetattr:
 		// Getattr event
 		var getattrIn = kernel.FuseGetattrIn{}
 		getattrIn.ParseBinary(bcontent)
@@ -245,7 +245,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = getattrOut
 
-	case kernel.FUSE_SETATTR:
+	case kernel.FuseOpSetattr:
 		// Setattr event
 		var setattrIn = kernel.FuseSetattrIn{}
 		setattrIn.ParseBinary(bcontent)
@@ -257,14 +257,14 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = setattrOut
 
-	case kernel.FUSE_READLINK:
+	case kernel.FuseOpReadlink:
 		// Readlink event
 		var readlinkOut = kernel.FuseReadlinkOut{}
 
 		errnum = doReadlink(*req, inHeader.Nodeid, &readlinkOut)
 
 		resp = readlinkOut
-	case kernel.FUSE_MKNOD:
+	case kernel.FuseOpMknod:
 		// Mknod event
 		var mknodIn = kernel.FuseMknodIn{}
 		mknodIn.ParseBinary(bcontent)
@@ -277,7 +277,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = mknodOut
 
-	case kernel.FUSE_MKDIR:
+	case kernel.FuseOpMkdir:
 		// Mkdir event
 		var mkdirIn = kernel.FuseMkdirIn{}
 		mkdirIn.ParseBinary(bcontent)
@@ -290,7 +290,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = mkdirOut
 
-	case kernel.FUSE_UNLINK:
+	case kernel.FuseOpUnlink:
 		// Unlink event
 		var unlinkIn = kernel.FuseUnlinkIn{}
 		unlinkIn.ParseBinary(bcontent)
@@ -299,7 +299,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doUnlink(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_RMDIR:
+	case kernel.FuseOpRmdir:
 		// Rmdir event
 		var rmdirIn = kernel.FuseRmdirIn{}
 		rmdirIn.ParseBinary(bcontent)
@@ -307,7 +307,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		req.Arg = &arg
 
 		errnum = doRmdir(*req, inHeader.Nodeid)
-	case kernel.FUSE_SYMLINK:
+	case kernel.FuseOpSymlink:
 		// Symlink event
 		var symlinkIn = kernel.FuseSymlinkIn{}
 		symlinkIn.ParseBinary(bcontent)
@@ -320,7 +320,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = symlinkOut
 
-	case kernel.FUSE_RENAME:
+	case kernel.FuseOpRename:
 		// Rename event
 		var renameIn = kernel.FuseRenameIn{}
 		renameIn.ParseBinary(bcontent)
@@ -329,7 +329,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doRename(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_RENAME2:
+	case kernel.FuseOpRename2:
 		// Rename2 event
 		var renameIn = kernel.FuseRename2In{}
 		renameIn.ParseBinary(bcontent)
@@ -337,7 +337,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		req.Arg = &arg
 
 		errnum = doRename2(*req, inHeader.Nodeid)
-	case kernel.FUSE_LINK:
+	case kernel.FuseOpLink:
 		// Link event
 		var linkIn = kernel.FuseLinkIn{}
 		linkIn.ParseBinary(bcontent)
@@ -350,7 +350,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = linkOut
 
-	case kernel.FUSE_OPEN:
+	case kernel.FuseOpOpen:
 		// Open event
 		var openIn = kernel.FuseOpenIn{}
 		openIn.ParseBinary(bcontent)
@@ -362,7 +362,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		errnum = doOpen(*req, inHeader.Nodeid, &openOut)
 
 		resp = openOut
-	case kernel.FUSE_READ:
+	case kernel.FuseOpRead:
 		// Read event
 		var readIn = kernel.FuseReadIn{}
 		readIn.ParseBinary(bcontent)
@@ -375,7 +375,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = readOut
 
-	case kernel.FUSE_WRITE:
+	case kernel.FuseOpWrite:
 		// Write event
 		var writeIn = kernel.FuseWriteIn{}
 		writeIn.ParseBinary(bcontent)
@@ -388,7 +388,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = writeOut
 
-	case kernel.FUSE_FSYNC:
+	case kernel.FuseOpFsync:
 		// Fsync event
 		var fsyncIn = kernel.FuseFsyncIn{}
 		fsyncIn.ParseBinary(bcontent)
@@ -397,7 +397,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doFsync(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_OPENDIR:
+	case kernel.FuseOpOpendir:
 		// Opendir event
 		var openIn = kernel.FuseOpenIn{}
 		openIn.ParseBinary(bcontent)
@@ -410,7 +410,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = openOut
 
-	case kernel.FUSE_READDIR:
+	case kernel.FuseOpReaddir:
 		// Readdir event
 		var readIn = kernel.FuseReadIn{}
 		readIn.ParseBinary(bcontent)
@@ -423,7 +423,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = readOut
 
-	case kernel.FUSE_RELEASE:
+	case kernel.FuseOpRelease:
 		// Release event
 		var releaseIn = kernel.FuseReleaseIn{}
 		releaseIn.ParseBinary(bcontent)
@@ -432,7 +432,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doRelease(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_RELEASEDIR:
+	case kernel.FuseOpReleasedir:
 		// Releasedir event
 		var releasedirIn = kernel.FuseReleaseIn{}
 		releasedirIn.ParseBinary(bcontent)
@@ -441,7 +441,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doReleasedir(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_FLUSH:
+	case kernel.FuseOpFlush:
 		var flushIn = kernel.FuseFlushIn{}
 		flushIn.ParseBinary(bcontent)
 		arg = flushIn
@@ -449,7 +449,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doFlush(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_FSYNCDIR:
+	case kernel.FuseOpFsyncdir:
 		// Fsyncdir event
 		var fsyncdirIn = kernel.FuseFsyncIn{}
 		fsyncdirIn.ParseBinary(bcontent)
@@ -458,7 +458,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doFsyncdir(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_STATFS:
+	case kernel.FuseOpStatfs:
 		// Statfs event
 
 		var statfsOut = kernel.FuseStatfsOut{}
@@ -467,7 +467,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = statfsOut
 
-	case kernel.FUSE_SETXATTR:
+	case kernel.FuseOpSetxattr:
 		// Setxattr event
 
 		var setxattrIn = kernel.FuseSetxattrIn{}
@@ -477,7 +477,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doSetxattr(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_GETXATTR:
+	case kernel.FuseOpGetxattr:
 		// Getxattr event
 
 		var getxattrIn = kernel.FuseGetxattrIn{}
@@ -494,7 +494,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 			resp = getxattrOut.Value
 		}
 
-	case kernel.FUSE_LISTXATTR:
+	case kernel.FuseOpListxattr:
 		// Listxattr event
 
 		var listxattrIn = kernel.FuseGetxattrIn{}
@@ -511,7 +511,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 			resp = listxattrOut.Value
 		}
 
-	case kernel.FUSE_REMOVEXATTR:
+	case kernel.FuseOpRemovexattr:
 		// Removexattr event
 
 		var removexattrIn = kernel.FuseRemovexattrIn{}
@@ -521,7 +521,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doRemovexattr(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_ACCESS:
+	case kernel.FuseOpAccess:
 		// Access event
 
 		var accessIn = kernel.FuseAccessIn{}
@@ -531,7 +531,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doAccess(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_CREATE:
+	case kernel.FuseOpCreate:
 		// Create event
 
 		var createIn = kernel.FuseCreateIn{}
@@ -549,7 +549,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 			resp = createOut
 		}
 
-	case kernel.FUSE_GETLK:
+	case kernel.FuseOpGetlk:
 		// Getlk event
 
 		var getlkIn = kernel.FuseLkIn{}
@@ -563,7 +563,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = lkout
 
-	case kernel.FUSE_SETLK:
+	case kernel.FuseOpSetlk:
 		// Setlk event
 
 		var setlkIn = kernel.FuseLkIn{}
@@ -573,7 +573,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doSetlk(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_SETLKW:
+	case kernel.FuseOpSetlkw:
 		// Getlkw event
 
 		var getlkIn = kernel.FuseLkIn{}
@@ -582,7 +582,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 		req.Arg = &arg
 
 		errnum = doSetlkw(*req, inHeader.Nodeid)
-	case kernel.FUSE_BMAP:
+	case kernel.FuseOpBmap:
 		// Bmap event
 
 		var bmapIn = kernel.FuseBmapIn{}
@@ -596,7 +596,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = bmapOut
 
-	case kernel.FUSE_IOCTL:
+	case kernel.FuseOpIoctl:
 		// Ioctl event
 
 		var ioctlIn = kernel.FuseIoctlIn{}
@@ -610,7 +610,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = ioctlOut
 
-	case kernel.FUSE_POLL:
+	case kernel.FuseOpPoll:
 		// Poll event
 
 		var pollIn = kernel.FusePollIn{}
@@ -624,7 +624,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = pollOut
 
-	case kernel.FUSE_FALLOCATE:
+	case kernel.FuseOpFallocate:
 		// Fallocate event
 
 		var fallocateIn = kernel.FuseFallocateIn{}
@@ -634,7 +634,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		errnum = doFallocate(*req, inHeader.Nodeid)
 
-	case kernel.FUSE_BATCH_FORGET:
+	case kernel.FuseOpBatckForget:
 		// Batch forget event
 
 		var batchForgetIn = kernel.FuseBatchForgetIn{}
@@ -646,7 +646,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		noreply = true
 
-	case kernel.FUSE_READDIRPLUS:
+	case kernel.FuseOpReaddirplus:
 		// readdirplus event
 
 		var readIn = kernel.FuseReadIn{}
@@ -660,7 +660,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 		resp = readOut
 
-	case kernel.FUSE_INTERRUPT:
+	case kernel.FuseOpInterrupt:
 		// interrupt event
 
 		doInterrupt(*req)
