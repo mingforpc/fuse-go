@@ -25,7 +25,7 @@ import (
 
 ......
 
-var getattr = func(req fuse.FuseReq, nodeid uint64) (fsStat *fuse.FuseStat, result int32) {
+var getattr = func(req fuse.Req, nodeid uint64) (fsStat *fuse.Stat, result int32) {
 
 	......
 
@@ -36,7 +36,7 @@ var getattr = func(req fuse.FuseReq, nodeid uint64) (fsStat *fuse.FuseStat, resu
 
 func main() {
     ......
-    opts := fuse.FuseOpt{}
+    opts := fuse.Opt{}
     opts.Getattr = &getattr
     opts.Opendir = &opendir
     opts.Readdir = &readdir
