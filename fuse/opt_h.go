@@ -23,7 +23,7 @@ type FuseOpt struct {
 	 * conn: 是与内核fuse协商的信息，如有需要直接修改
 	 * userdata: 是应用需要保存的数据，不需要直接返回nil即可
 	 */
-	Init *func(conn *FuseConnInfo) (userdata interface{})
+	Init *func(conn *ConnInfo) (userdata interface{})
 
 	/**
 	* Destory

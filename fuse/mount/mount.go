@@ -28,7 +28,7 @@ func unixgramSocketpair() (l, r *os.File, err error) {
 
 // Mount : Create a FUSE FS on the specified mount point.  The returned
 // mount point is always absolute.
-func Mount(se *fuse.FuseSession) (err error) {
+func Mount(se *fuse.Session) (err error) {
 	local, remote, err := unixgramSocketpair()
 	if err != nil {
 		return

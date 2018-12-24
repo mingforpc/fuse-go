@@ -1335,14 +1335,14 @@ func setOpenOut(openOut *kernel.FuseOpenOut, fi FuseFileInfo) {
 	openOut.Fh = fi.Fh
 
 	if fi.DirectIo > 0 {
-		openOut.OpenFlags |= FOPEN_DIRECT_IO
+		openOut.OpenFlags |= FOpenDirectIO
 	}
 
 	if fi.KeepCache > 0 {
-		openOut.OpenFlags |= FOPEN_KEEP_CACHE
+		openOut.OpenFlags |= FOpenKeepCache
 	}
 
 	if fi.Nonseekable > 0 {
-		openOut.OpenFlags |= FOPEN_NONSEEKABLE
+		openOut.OpenFlags |= FOpenNonSeekable
 	}
 }

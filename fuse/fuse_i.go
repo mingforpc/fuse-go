@@ -8,38 +8,46 @@ import (
 	"github.com/mingforpc/fuse-go/fuse/kernel"
 )
 
-const KERNEL_BUF_PAGES = 32
+// KernelBufPages : the buffer pages of kernel
+const KernelBufPages = 32
 
-/* room needed in buffer to accommodate header */
-const HEADER_SIZE = 0x1000
+// HeaderSize : room needed in buffer to accommodate header
+const HeaderSize = 0x1000
 
 /**
  * Flags returned by the OPEN request
  *
- * FOPEN_DIRECT_IO: bypass page cache for this open file
- * FOPEN_KEEP_CACHE: don't invalidate the data cache on open
- * FOPEN_NONSEEKABLE: the file is not seekable
+ * FOpenDirectIO: bypass page cache for this open file
+ * FOpenKeepCache: don't invalidate the data cache on open
+ * FOpenNonSeekable: the file is not seekable
  */
-const FOPEN_DIRECT_IO = (1 << 0)
-const FOPEN_KEEP_CACHE = (1 << 1)
-const FOPEN_NONSEEKABLE = (1 << 2)
+const (
+	FOpenDirectIO    = (1 << 0)
+	FOpenKeepCache   = (1 << 1)
+	FOpenNonSeekable = (1 << 2)
+)
 
-/* 'to_set' flags in setattr */
-const FUSE_SET_ATTR_MODE = (1 << 0)
-const FUSE_SET_ATTR_UID = (1 << 1)
-const FUSE_SET_ATTR_GID = (1 << 2)
-const FUSE_SET_ATTR_SIZE = (1 << 3)
-const FUSE_SET_ATTR_ATIME = (1 << 4)
-const FUSE_SET_ATTR_MTIME = (1 << 5)
-const FUSE_SET_ATTR_ATIME_NOW = (1 << 7)
-const FUSE_SET_ATTR_MTIME_NOW = (1 << 8)
-const FUSE_SET_ATTR_CTIME = (1 << 10)
+/* 'toSet' flags in setattr */
+const (
+	FuseSetAttrMode     = (1 << 0)
+	FuseSetAttrUID      = (1 << 1)
+	FuseSetAttrGID      = (1 << 2)
+	FuseSetAttrSize     = (1 << 3)
+	FuseSetAttrAtime    = (1 << 4)
+	FuseSetAttrMtime    = (1 << 5)
+	FuseSetAttrAtimeNow = (1 << 7)
+	FuseSetAttrMtimeNow = (1 << 8)
+	FuseSetAttrCtime    = (1 << 10)
+)
 
 /* XATTR set flag  */
-const XATTR_CREATE = 0x1
-const XATTR_REPLACE = 0x2
+const (
+	XattrCreate  = 0x1
+	XattrReplace = 0x2
+)
 
-type FuseConnInfo struct {
+// ConnInfo : Fuse Connection Info
+type ConnInfo struct {
 	Major        uint32
 	Minor        uint32
 	MaxReadahead uint32
@@ -63,7 +71,8 @@ type FuseConnInfo struct {
 	TimeGran            uint32
 }
 
-type FuseSession struct {
+// Session : The main session to control fuse application
+type Session struct {
 	Mountpoint string
 
 	dev *os.File // "dev/fuse"
@@ -74,7 +83,7 @@ type FuseSession struct {
 
 	maxGoro int // max goroutine num
 
-	connInfo *FuseConnInfo
+	connInfo *ConnInfo
 
 	FuseConfig *FuseConfig
 
@@ -92,23 +101,23 @@ type FuseSession struct {
 	userdata interface{} // user data
 }
 
-func NewFuseSession(mountpoint string, opts *FuseOpt, maxGoro int) *FuseSession {
+func NewFuseSession(mountpoint string, opts *FuseOpt, maxGoro int) *Session {
 
-	se := &FuseSession{}
+	se := &Session{}
 	se.Init(mountpoint, opts, maxGoro)
 
 	return se
 }
 
-func (se *FuseSession) Init(mountpoint string, opts *FuseOpt, maxGoro int) {
+func (se *Session) Init(mountpoint string, opts *FuseOpt, maxGoro int) {
 
 	se.Mountpoint = mountpoint
 
-	se.bufsize = KERNEL_BUF_PAGES*syscall.Getpagesize() + HEADER_SIZE
+	se.bufsize = KernelBufPages*syscall.Getpagesize() + HeaderSize
 	se.Opts = opts
 	se.maxGoro = maxGoro
 
-	se.connInfo = &FuseConnInfo{}
+	se.connInfo = &ConnInfo{}
 
 	se.connInfo.TimeGran = 1
 
@@ -118,16 +127,16 @@ func (se *FuseSession) Init(mountpoint string, opts *FuseOpt, maxGoro int) {
 	se.inited = true
 }
 
-func (se *FuseSession) IsInited() bool {
+func (se *Session) IsInited() bool {
 	return se.inited
 }
 
-func (se *FuseSession) SetDev(fd uintptr) {
+func (se *Session) SetDev(fd uintptr) {
 	se.dev = os.NewFile(fd, "/dev/fuse")
 }
 
 type FuseReq struct {
-	session *FuseSession
+	session *Session
 
 	Unique  uint64
 	Uid     uint32
@@ -138,7 +147,7 @@ type FuseReq struct {
 	Arg *interface{}
 }
 
-func (req *FuseReq) Init(se *FuseSession, inheader kernel.FuseInHeader) {
+func (req *FuseReq) Init(se *Session, inheader kernel.FuseInHeader) {
 	req.session = se
 	req.Unique = inheader.Unique
 	req.Uid = inheader.UID
@@ -228,7 +237,7 @@ func NewFuseFileInfo() FuseFileInfo {
 
 type FusePollhandle struct {
 	Kh uint64
-	Se FuseSession
+	Se Session
 }
 
 type FuseStat struct {

@@ -10,7 +10,7 @@ import (
 )
 
 // The loop to read/write '/dev/fuse'
-func (se *FuseSession) FuseLoop() {
+func (se *Session) FuseLoop() {
 
 	if !se.IsInited() {
 		panic(kernel.ErrNotInit)
@@ -83,7 +83,7 @@ func (se *FuseSession) FuseLoop() {
 
 }
 
-func (se *FuseSession) readGoro() {
+func (se *Session) readGoro() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error.Printf("Read goroutine error[%s] \n", err)
@@ -111,7 +111,7 @@ func (se *FuseSession) readGoro() {
 
 }
 
-func (se *FuseSession) writeGoro() {
+func (se *Session) writeGoro() {
 	for se.Running {
 
 		res, ok := <-se.writeChan
@@ -131,7 +131,7 @@ func (se *FuseSession) writeGoro() {
 
 }
 
-func (se *FuseSession) Close() {
+func (se *Session) Close() {
 	se.Running = false
 	se.dev.Close()
 
@@ -141,7 +141,7 @@ func (se *FuseSession) Close() {
 }
 
 // Read event from '/dev/fuse'
-func (se *FuseSession) readCmd() ([]byte, error) {
+func (se *Session) readCmd() ([]byte, error) {
 	var cmdLenBytes = make([]byte, se.bufsize)
 
 	n, err := se.dev.Read(cmdLenBytes)
@@ -154,7 +154,7 @@ func (se *FuseSession) readCmd() ([]byte, error) {
 	return cmdLenBytes, err
 }
 
-func (se *FuseSession) parseHeader(bcontent []byte) (kernel.FuseInHeader, []byte, error) {
+func (se *Session) parseHeader(bcontent []byte) (kernel.FuseInHeader, []byte, error) {
 	var inheader = kernel.FuseInHeader{}
 
 	headerbytes := bcontent[:40]
@@ -171,7 +171,7 @@ func (se *FuseSession) parseHeader(bcontent []byte) (kernel.FuseInHeader, []byte
 }
 
 // Write response to '/dev/fuse'
-func (se *FuseSession) writeCmd(resp []byte) error {
+func (se *Session) writeCmd(resp []byte) error {
 	if se.Debug {
 		log.Trace.Printf("resp[%+v] \n", resp)
 	}
