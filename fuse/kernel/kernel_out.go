@@ -7,13 +7,16 @@ import (
 	"github.com/mingforpc/fuse-go/fuse/common"
 )
 
-const OUT_HEADER_LEN = 16
+// OutHeaderLen : lenght of FuseOutHeader
+const OutHeaderLen = 16
 
-type FuseRespIntf interface {
+// FuseResponsor : the interface of fuse response
+type FuseResponsor interface {
 	ToBinary() ([]byte, error)
 }
 
-// each answer starts with a FuseOutHeader
+// FuseOutHeader : the header of response,
+// each answer starts with this.
 // 16 bytes
 type FuseOutHeader struct {
 	Len    uint32
@@ -21,11 +24,12 @@ type FuseOutHeader struct {
 	Unique uint64
 }
 
+// ToBinary : Parse to binary
 func (outHeader FuseOutHeader) ToBinary() ([]byte, error) {
 	return common.ToBinary(outHeader)
 }
 
-// init
+// FuseInitOut : init response
 // 64 bytes
 type FuseInitOut struct {
 	// Header FuseOutHeader
@@ -41,11 +45,12 @@ type FuseInitOut struct {
 	Unused              [9]uint32
 }
 
+// ToBinary : Parse to binary
 func (init FuseInitOut) ToBinary() ([]byte, error) {
 	return common.ToBinary(init)
 }
 
-// getattr, setattr
+// FuseAttrOut : getattr, setattr response
 type FuseAttrOut struct {
 	AttrValid     uint64 /* Cache timeout for the attributes */
 	AttrValidNsec uint32
@@ -54,15 +59,17 @@ type FuseAttrOut struct {
 	Attr FuseAttr
 }
 
+// ToBinary : Parse to binary
 func (attr FuseAttrOut) ToBinary() ([]byte, error) {
 	return common.ToBinary(attr)
 }
 
-// readlink
+// FuseReadlinkOut : readlink response
 type FuseReadlinkOut struct {
 	Path string
 }
 
+// ToBinary : Parse to binary
 func (link FuseReadlinkOut) ToBinary() ([]byte, error) {
 
 	buf := bytes.NewBuffer(nil)
@@ -74,9 +81,9 @@ func (link FuseReadlinkOut) ToBinary() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// lookup, symlink, mknod, mkdir, link
+// FuseEntryOut : lookup, symlink, mknod, mkdir, link response
 type FuseEntryOut struct {
-	NodeId         uint64 /* Inode ID */
+	NodeID         uint64 /* Inode ID */
 	Generation     uint64 /* Inode generation: nodeid:gen must be unique for the fs's lifetime */
 	EntryValid     uint64 /* Cache timeout for the name */
 	AttrValid      uint64 /* Cache timeout for the attributes */
@@ -86,46 +93,50 @@ type FuseEntryOut struct {
 	Attr FuseAttr
 }
 
+// ToBinary : Parse to binary
 func (entry FuseEntryOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(entry)
 }
 
-// create
+// FuseCreateOut : create response
 // create 要返回FuseEntryOut和FuseOpenOut
 type FuseCreateOut struct {
 	Entry FuseEntryOut
 	Open  FuseOpenOut
 }
 
+// ToBinary : Parse to binary
 func (create FuseCreateOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(create)
 }
 
-// open, opendir
+// FuseOpenOut : open, opendir response
 type FuseOpenOut struct {
 	Fh        uint64
 	OpenFlags uint32
 	Padding   uint32
 }
 
+// ToBinary : Parse to binary
 func (open FuseOpenOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(open)
 }
 
-// read, readdir
+// FuseReadOut : read, readdir response
 type FuseReadOut struct {
 	Content []byte
 }
 
+// ToBinary : Parse to binary
 func (read FuseReadOut) ToBinary() ([]byte, error) {
 
 	return read.Content, nil
 }
 
-// 目录的结构体，二进制方式写入readdir的Content中
+// FuseDirent : 目录的结构体，二进制方式写入readdir的Content中
 type FuseDirent struct {
 	Ino     uint64
 	Off     uint64
@@ -134,18 +145,20 @@ type FuseDirent struct {
 	Name    string
 }
 
-const DIRENT_NAME_OFFSET = 24
+// direntNameOffset : the lenght of direntNameOffset
+const direntNameOffset = 24
 
-// fuseDirentAlign用来保证长度是8的n次方
+// fuseDirentAlign : 用来保证长度是8的n次方
 func fuseDirentAlign(entlent uint64) uint64 {
 
 	return (entlent + 8 - 1) & (^uint64(7))
 }
 
+// ToBinary : Parse to binary
 // ToBinary将FuseDirent转为二进制数据, preOff是在list里面，上一个的偏移量
 func (dirent *FuseDirent) ToBinary(preOff *uint64) ([]byte, error) {
 
-	entLen := fuseDirentAlign(DIRENT_NAME_OFFSET + uint64(dirent.NameLen))
+	entLen := fuseDirentAlign(direntNameOffset + uint64(dirent.NameLen))
 
 	buf := bytes.NewBuffer(nil)
 
@@ -163,29 +176,33 @@ func (dirent *FuseDirent) ToBinary(preOff *uint64) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// write
+// FuseWriteOut : write response
 type FuseWriteOut struct {
 	Size    uint32
 	Padding uint32
 }
 
+// ToBinary : Parse to binary
 func (write FuseWriteOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(write)
 }
 
-// statfs
+// FuseStatfsOut : statfs response
 type FuseStatfsOut struct {
 	St FuseStatfs
 }
 
+// ToBinary : Parse to binary
 func (statfs FuseStatfsOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(statfs)
 }
 
+// XattrVal : value of xattr
 type XattrVal string
 
+// ToBinary : Parse to binary
 func (val XattrVal) ToBinary() ([]byte, error) {
 
 	buf := bytes.NewBuffer(nil)
@@ -196,7 +213,7 @@ func (val XattrVal) ToBinary() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// getxattr, listxattr
+// FuseGetxattrOut : getxattr, listxattr response
 type FuseGetxattrOut struct {
 	Size    uint32
 	Padding uint32
@@ -204,6 +221,7 @@ type FuseGetxattrOut struct {
 	Value XattrVal
 }
 
+// ToBinary : Parse to binary
 func (getxattr FuseGetxattrOut) ToBinary() ([]byte, error) {
 
 	buf := bytes.NewBuffer(nil)
@@ -220,17 +238,18 @@ func (getxattr FuseGetxattrOut) ToBinary() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// getlk, setlk, setlkw
+// FuseLkOut : getlk, setlk, setlkw response
 type FuseLkOut struct {
 	Lk FuseFileLock
 }
 
+// ToBinary : Parse to binary
 func (lk FuseLkOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(lk)
 }
 
-// ioctl
+// FuseIoctlOut : ioctl response
 type FuseIoctlOut struct {
 	Result  int32
 	Flags   uint32
@@ -238,46 +257,48 @@ type FuseIoctlOut struct {
 	OutIovs uint32
 }
 
+// ToBinary : Parse to binary
 func (ioctl FuseIoctlOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(ioctl)
 }
 
-// poll
+// FusePollOut : poll response
 type FusePollOut struct {
 	Revents uint32
 	Padding uint32
 }
 
+// ToBinary : Parse to binary
 func (poll FusePollOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(poll)
 }
 
-// lseek
+// FuseLseekOut : lseek response
 type FuseLseekOut struct {
 	Offset uint64
 }
 
+// ToBinary : Parse to binary
 func (lseek FuseLseekOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(lseek)
 }
 
-// bmap
+// FuseBmapOut : bmap response
 type FuseBmapOut struct {
 	Block uint64
 }
 
+// ToBinary : Parse to binary
 func (bmap FuseBmapOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(bmap)
 }
 
-// cuse_init
+// CuseInitOut : cuse_init response
 type CuseInitOut struct {
-	// Header FuseOutHeader
-
 	Major    uint32
 	Minor    uint32
 	Unused   uint32
@@ -289,6 +310,7 @@ type CuseInitOut struct {
 	Spare    [10]uint32
 }
 
+// ToBinary : Parse to binary
 func (cuseinit CuseInitOut) ToBinary() ([]byte, error) {
 
 	return common.ToBinary(cuseinit)

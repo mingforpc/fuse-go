@@ -185,7 +185,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 
 	var arg interface{}
 	var errnum int32
-	var resp kernel.FuseRespIntf
+	var resp kernel.FuseResponsor
 
 	var noreply = false
 
@@ -704,7 +704,7 @@ func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]
 }
 
 // Function to generate bytes response
-func generateResp(outHeader kernel.FuseOutHeader, resp kernel.FuseRespIntf) ([]byte, error) {
+func generateResp(outHeader kernel.FuseOutHeader, resp kernel.FuseResponsor) ([]byte, error) {
 
 	buf := bytes.NewBuffer(nil)
 
@@ -718,7 +718,7 @@ func generateResp(outHeader kernel.FuseOutHeader, resp kernel.FuseRespIntf) ([]b
 		}
 	}
 
-	outHeader.Len = uint32(kernel.OUT_HEADER_LEN + len(bresp))
+	outHeader.Len = uint32(kernel.OutHeaderLen + len(bresp))
 
 	bheader, err := outHeader.ToBinary()
 	if err != nil {

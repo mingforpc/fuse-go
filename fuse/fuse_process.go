@@ -239,7 +239,7 @@ func doLookup(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 		fsStat, res := (*se.Opts.Lookup)(req, nodeid, lookupIn.Name)
 
 		if res == errno.SUCCESS {
-			entryOut.NodeId = fsStat.Nodeid
+			entryOut.NodeID = fsStat.Nodeid
 			entryOut.Generation = fsStat.Generation
 			entryOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
@@ -357,7 +357,7 @@ func doMknod(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 		stat, res := (*se.Opts.Mknod)(req, nodeid, mknodIn.Name, mknodIn.Mode, mknodIn.Rdev)
 
 		if res == errno.SUCCESS {
-			entryOut.NodeId = stat.Nodeid
+			entryOut.NodeID = stat.Nodeid
 			entryOut.Generation = stat.Generation
 			entryOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
@@ -386,7 +386,7 @@ func doMkdir(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 		stat, res := (*se.Opts.Mkdir)(req, nodeid, mkdirIn.Name, mkdirIn.Mode)
 
 		if res == errno.SUCCESS {
-			entryOut.NodeId = stat.Nodeid
+			entryOut.NodeID = stat.Nodeid
 			entryOut.Generation = stat.Generation
 			entryOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
@@ -454,7 +454,7 @@ func doSymlink(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 
 		stat, res := (*se.Opts.Symlink)(req, nodeid, symlinkIn.LinkName, symlinkIn.Name)
 
 		if res == errno.SUCCESS {
-			entryOut.NodeId = stat.Nodeid
+			entryOut.NodeID = stat.Nodeid
 			entryOut.Generation = stat.Generation
 			entryOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
@@ -521,7 +521,7 @@ func doLink(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 		stat, res := (*se.Opts.Link)(req, linklIn.OldNodeid, nodeid, linklIn.NewName)
 
 		if res == errno.SUCCESS {
-			entryOut.NodeId = stat.Nodeid
+			entryOut.NodeID = stat.Nodeid
 			entryOut.Generation = stat.Generation
 			entryOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			entryOut.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
@@ -987,7 +987,7 @@ func doCreate(req FuseReq, nodeid uint64, createOut *kernel.FuseCreateOut) int32
 
 		if res == errno.SUCCESS {
 
-			createOut.Entry.NodeId = stat.Nodeid
+			createOut.Entry.NodeID = stat.Nodeid
 			createOut.Entry.Generation = stat.Generation
 			createOut.Entry.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
 			createOut.Entry.AttrValidNsec = common.CalcTimeoutNsec(se.FuseConfig.AttrTimeout)
@@ -1326,7 +1326,7 @@ func setattrInToStat(setattrIn kernel.FuseSetattrIn, stat *syscall.Stat_t) {
 	stat.Ctim.Sec = int64(setattrIn.Ctime)
 	stat.Ctim.Nsec = int64(setattrIn.CtimeNsec)
 	stat.Mode = setattrIn.Mode
-	stat.Uid = setattrIn.Uid
+	stat.Uid = setattrIn.UID
 	stat.Gid = setattrIn.Gid
 
 }

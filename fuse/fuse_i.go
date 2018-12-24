@@ -141,7 +141,7 @@ type FuseReq struct {
 func (req *FuseReq) Init(se *FuseSession, inheader kernel.FuseInHeader) {
 	req.session = se
 	req.Unique = inheader.Unique
-	req.Uid = inheader.Uid
+	req.Uid = inheader.UID
 	req.Gid = inheader.Gid
 	req.Pid = inheader.Pid
 	req.Padding = inheader.Padding

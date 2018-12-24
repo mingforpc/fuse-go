@@ -6,25 +6,26 @@ import (
 	"github.com/mingforpc/fuse-go/fuse/common"
 )
 
-// Each query starts with a FuseInHeader
+// FuseInHeader : each query starts with a FuseInHeader
 type FuseInHeader struct {
 	Len     uint32
 	Opcode  uint32
 	Unique  uint64
 	Nodeid  uint64
-	Uid     uint32
+	UID     uint32
 	Gid     uint32
 	Pid     uint32
 	Padding uint32
 }
 
+// ParseBinary : Parse binary to FuseInHeader
 func (header *FuseInHeader) ParseBinary(bcontent []byte) error {
 	err := common.ParseBinary(bcontent, header)
 
 	return err
 }
 
-// init
+// FuseInitIn : init request
 type FuseInitIn struct {
 	Major        uint32
 	Minor        uint32
@@ -32,30 +33,33 @@ type FuseInitIn struct {
 	Flags        uint32
 }
 
+// ParseBinary : Parse binary to FuseInitIn
 func (init *FuseInitIn) ParseBinary(bcontent []byte) error {
 	err := common.ParseBinary(bcontent, init)
 
 	return err
 }
 
-// getattr
+// FuseGetattrIn : getattr request
 type FuseGetattrIn struct {
 	GetattrFlags uint32
 	Dummy        uint32
 	Fh           uint64
 }
 
+// ParseBinary : Parse binary to FuseGetattrIn
 func (getattr *FuseGetattrIn) ParseBinary(bcontent []byte) error {
 	err := common.ParseBinary(bcontent, getattr)
 
 	return err
 }
 
-// lookup
+// FuseLookupIn : lookup request
 type FuseLookupIn struct {
 	Name string
 }
 
+// ParseBinary : Parse binary to FuseLoopIn
 func (lookup *FuseLookupIn) ParseBinary(bcontent []byte) error {
 	length := len(bcontent)
 
@@ -67,18 +71,19 @@ func (lookup *FuseLookupIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// forget (should not send any reply)
+// FuseForgetIn : forget request (should not send any reply)
 type FuseForgetIn struct {
 	Nlookup uint64
 }
 
+// ParseBinary : Parse binary to FuseForgetIn
 func (forget *FuseForgetIn) ParseBinary(bcontent []byte) error {
 	err := common.ParseBinary(bcontent, forget)
 
 	return err
 }
 
-// setattr
+// FuseSetattrIn : setattr request
 type FuseSetattrIn struct {
 	Valid     uint32
 	Padding   uint32
@@ -93,18 +98,19 @@ type FuseSetattrIn struct {
 	CtimeNsec uint32
 	Mode      uint32
 	Unused4   uint32
-	Uid       uint32
+	UID       uint32
 	Gid       uint32
 	Unused5   uint32
 }
 
+// ParseBinary : Parse FuseInHeader to binary
 func (setattr *FuseSetattrIn) ParseBinary(bcontent []byte) error {
 	err := common.ParseBinary(bcontent, setattr)
 
 	return err
 }
 
-// mknod
+// FuseMknodIn : mknod request
 type FuseMknodIn struct {
 	Mode    uint32
 	Rdev    uint32
@@ -114,6 +120,7 @@ type FuseMknodIn struct {
 	Name string
 }
 
+// ParseBinary : Parse binary to FuseMknodIn
 func (mknod *FuseMknodIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -132,7 +139,7 @@ func (mknod *FuseMknodIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// mkdir
+// FuseMkdirIn : mkdir request
 type FuseMkdirIn struct {
 	Mode  uint32
 	Umask uint32
@@ -140,6 +147,7 @@ type FuseMkdirIn struct {
 	Name string
 }
 
+// ParseBinary : Parse binary to FuseMkdirIn
 func (mkdir *FuseMkdirIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -156,11 +164,12 @@ func (mkdir *FuseMkdirIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// rmdir
+// FuseRmdirIn : rmdir request
 type FuseRmdirIn struct {
 	Path string
 }
 
+// ParseBinary : Parse binary to FuseRmdirIn
 func (rmdir *FuseRmdirIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -168,11 +177,12 @@ func (rmdir *FuseRmdirIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// unlink
+// FuseUnlinkIn : unlink request
 type FuseUnlinkIn struct {
 	Path string
 }
 
+// ParseBinary : Parse binary to FuseUnlinkIn
 func (unlink *FuseUnlinkIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -180,13 +190,14 @@ func (unlink *FuseUnlinkIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// symlink
+// FuseSymlinkIn : symlink request
 type FuseSymlinkIn struct {
 	Name string
 
 	LinkName string
 }
 
+// ParseBinary : Parse binary to FuseSymlinkIn
 func (symlink *FuseSymlinkIn) ParseBinary(bcontent []byte) error {
 
 	array := bytes.Split(bcontent, []byte{0})
@@ -201,7 +212,7 @@ func (symlink *FuseSymlinkIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// rename
+// FuseRenameIn : rename request
 type FuseRenameIn struct {
 	NewDir uint64
 
@@ -210,6 +221,7 @@ type FuseRenameIn struct {
 	NewName string
 }
 
+// ParseBinary : Parse binary to FuseRenameIn
 func (rename *FuseRenameIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -236,13 +248,14 @@ func (rename *FuseRenameIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// link
+// FuseLinkIn : link request
 type FuseLinkIn struct {
 	OldNodeid uint64
 
 	NewName string
 }
 
+// ParseBinary : Parse binary to FuseLinkIn
 func (link *FuseLinkIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -262,12 +275,13 @@ func (link *FuseLinkIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// open, opendir
+// FuseOpenIn : open, opendir request
 type FuseOpenIn struct {
 	Flags  uint32
 	Unused uint32
 }
 
+// ParseBinary : Parse binary to FuseOpenIn
 func (open *FuseOpenIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -281,7 +295,7 @@ func (open *FuseOpenIn) ParseBinary(bcontent []byte) error {
 	return err
 }
 
-// read, readdir
+// FuseReadIn : read, readdir request
 type FuseReadIn struct {
 	Fh        uint64
 	Offset    uint64
@@ -292,6 +306,7 @@ type FuseReadIn struct {
 	Padding   uint32
 }
 
+// ParseBinary : Parse binary to FuseReadIn
 func (read *FuseReadIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -305,7 +320,7 @@ func (read *FuseReadIn) ParseBinary(bcontent []byte) error {
 	return err
 }
 
-// write
+// FuseWriteIn : write request
 type FuseWriteIn struct {
 	Fh         uint64
 	Offset     uint64
@@ -318,6 +333,7 @@ type FuseWriteIn struct {
 	Buf []byte
 }
 
+// ParseBinary : Parse binary to
 func (write *FuseWriteIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -339,7 +355,7 @@ func (write *FuseWriteIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// release, releasedir
+// FuseReleaseIn : release, releasedir request
 type FuseReleaseIn struct {
 	Fh           uint64
 	Flags        uint32
@@ -347,6 +363,7 @@ type FuseReleaseIn struct {
 	LockOwner    uint64
 }
 
+// ParseBinary : Parse binary to FuseReleaseIn
 func (release *FuseReleaseIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -360,13 +377,14 @@ func (release *FuseReleaseIn) ParseBinary(bcontent []byte) error {
 	return err
 }
 
-// fsync, fsyncdir
+// FuseFsyncIn : fsync, fsyncdir request
 type FuseFsyncIn struct {
 	Fh         uint64
 	FsyncFlags uint32
 	Padding    uint32
 }
 
+// ParseBinary : Parse binary to FuseFsyncIn
 func (fsync *FuseFsyncIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -380,7 +398,7 @@ func (fsync *FuseFsyncIn) ParseBinary(bcontent []byte) error {
 	return err
 }
 
-// setxattr
+// FuseSetxattrIn : setxattr
 type FuseSetxattrIn struct {
 	Size  uint32
 	Flags uint32
@@ -389,6 +407,7 @@ type FuseSetxattrIn struct {
 	Value string
 }
 
+// ParseBinary : Parse binary to FuseSetxattrIn
 func (setxattr *FuseSetxattrIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -412,7 +431,7 @@ func (setxattr *FuseSetxattrIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// getxattr, listxattr
+// FuseGetxattrIn : getxattr, listxattr request
 type FuseGetxattrIn struct {
 	Size    uint32
 	Padding uint32
@@ -420,6 +439,7 @@ type FuseGetxattrIn struct {
 	Name string
 }
 
+// ParseBinary : Parse binary to FuseGetxattrIn
 func (getxattr *FuseGetxattrIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -438,11 +458,12 @@ func (getxattr *FuseGetxattrIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// removexattr
+// FuseRemovexattrIn : removexattr request
 type FuseRemovexattrIn struct {
 	Name string
 }
 
+// ParseBinary : Parse binary to FuseRemovexattrIn
 func (removexattr *FuseRemovexattrIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -453,7 +474,7 @@ func (removexattr *FuseRemovexattrIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// flush
+// FuseFlushIn : flush request
 type FuseFlushIn struct {
 	Fh        uint64
 	Unused    uint32
@@ -461,6 +482,7 @@ type FuseFlushIn struct {
 	LockOwner uint64
 }
 
+// ParseBinary : Parse binary to FuseFlushIn
 func (flush *FuseFlushIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -474,7 +496,7 @@ func (flush *FuseFlushIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// getlk, setlk, setlkw
+// FuseLkIn : getlk, setlk, setlkw request
 type FuseLkIn struct {
 	Fh      uint64
 	Owner   uint64
@@ -483,6 +505,7 @@ type FuseLkIn struct {
 	Padding uint32
 }
 
+// ParseBinary : Parse binary to FuseLkIn
 func (lk *FuseLkIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -496,12 +519,13 @@ func (lk *FuseLkIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// access
+// FuseAccessIn : access request
 type FuseAccessIn struct {
 	Mask    uint32
 	Padding uint32
 }
 
+// ParseBinary : Parse binary to FuseAccessIn
 func (access *FuseAccessIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -515,7 +539,7 @@ func (access *FuseAccessIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// create
+// FuseCreateIn : create request
 type FuseCreateIn struct {
 	Flags   uint32
 	Mode    uint32
@@ -525,6 +549,7 @@ type FuseCreateIn struct {
 	Name string
 }
 
+// ParseBinary : Parse binary to FuseCreateIn
 func (create *FuseCreateIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -538,17 +563,18 @@ func (create *FuseCreateIn) ParseBinary(bcontent []byte) error {
 	common.ParseBinary(bcontent[8:12], &create.Umask)
 	common.ParseBinary(bcontent[12:16], &create.Padding)
 
-	// length-1 是为了避开最后一个\0字符
+	// length-1 是为了避开最后一个'\0'字符
 	create.Name = string(bcontent[16 : length-1])
 
 	return nil
 }
 
-// interrupt
+// FuseInterruptIn : interrupt request
 type FuseInterruptIn struct {
 	Unique uint64
 }
 
+// ParseBinary : Parse binary to FuseInterruptIn
 func (interrupt *FuseInterruptIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -562,13 +588,14 @@ func (interrupt *FuseInterruptIn) ParseBinary(bcontent []byte) error {
 	return err
 }
 
-// bmap
+// FuseBmapIn : bmap request
 type FuseBmapIn struct {
 	Block     uint64
 	BlockSize uint32
 	Padding   uint32
 }
 
+// ParseBinary : Parse binary to FuseBmapIn
 func (bmap *FuseBmapIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -582,7 +609,7 @@ func (bmap *FuseBmapIn) ParseBinary(bcontent []byte) error {
 	return err
 }
 
-// ioctl
+// FuseIoctlIn : ioctl request
 type FuseIoctlIn struct {
 	Fh      uint64
 	Flags   uint32
@@ -594,6 +621,7 @@ type FuseIoctlIn struct {
 	InBuf []byte
 }
 
+// ParseBinary : Parse binary to FuseIoctlIn
 func (ioctl *FuseIoctlIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -614,7 +642,7 @@ func (ioctl *FuseIoctlIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// poll
+// FusePollIn : poll request
 type FusePollIn struct {
 	Fh     uint64
 	Kh     uint64
@@ -622,6 +650,7 @@ type FusePollIn struct {
 	Events uint32
 }
 
+// ParseBinary : Parse binary to FusePollIn
 func (poll *FusePollIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -635,13 +664,13 @@ func (poll *FusePollIn) ParseBinary(bcontent []byte) error {
 	return err
 }
 
-// The inode to fotget
+// FuseForgetOne : the inode to fotget
 type FuseForgetOne struct {
 	Nodeid  uint64
 	Nlookup uint64
 }
 
-// batch_forget
+// FuseBatchForgetIn : batch_forget request
 type FuseBatchForgetIn struct {
 	Count uint32
 	Dummy uint32
@@ -649,6 +678,7 @@ type FuseBatchForgetIn struct {
 	NodeList []FuseForgetOne
 }
 
+// ParseBinary : Parse binary to FuseBatchForgetIn
 func (forget *FuseBatchForgetIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -671,7 +701,7 @@ func (forget *FuseBatchForgetIn) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// fallocate
+// FuseFallocateIn : fallocate request
 type FuseFallocateIn struct {
 	Fh      uint64
 	Offset  uint64
@@ -680,6 +710,7 @@ type FuseFallocateIn struct {
 	Padding uint32
 }
 
+// ParseBinary : Parse binary to FuseFallocateIn
 func (fallocate *FuseFallocateIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -693,7 +724,7 @@ func (fallocate *FuseFallocateIn) ParseBinary(bcontent []byte) error {
 	return err
 }
 
-// rename2
+// FuseRename2In : rename2 request
 type FuseRename2In struct {
 	NewDir  uint64
 	Flags   uint32
@@ -703,6 +734,7 @@ type FuseRename2In struct {
 	NewName string
 }
 
+// ParseBinary : Parse binary to FuseRename2In
 func (rename *FuseRename2In) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -727,7 +759,7 @@ func (rename *FuseRename2In) ParseBinary(bcontent []byte) error {
 	return nil
 }
 
-// lseek
+// FuseLseekIn : lseek request
 type FuseLseekIn struct {
 	Fh      uint64
 	Offset  uint64
@@ -735,6 +767,7 @@ type FuseLseekIn struct {
 	Padding uint32
 }
 
+// ParseBinary : Parse binary to FuseLseekIn
 func (lseek *FuseLseekIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
@@ -748,7 +781,7 @@ func (lseek *FuseLseekIn) ParseBinary(bcontent []byte) error {
 	return err
 }
 
-// cuse_init
+// CuseInitIn : cuse_init request
 type CuseInitIn struct {
 	Major  uint32
 	Minor  uint32
@@ -756,6 +789,7 @@ type CuseInitIn struct {
 	Flags  uint32
 }
 
+// ParseBinary : Parse binary to CuseInitIn
 func (cuseInit *CuseInitIn) ParseBinary(bcontent []byte) error {
 
 	length := len(bcontent)
