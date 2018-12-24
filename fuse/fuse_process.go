@@ -229,6 +229,7 @@ func doDestory(req Req) {
 func doLookup(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 	lookupIn := (*req.Arg).(kernel.FuseLookupIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Lookup: %+v \n", lookupIn)
@@ -248,10 +249,9 @@ func doLookup(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 			setFuseAttr(&entryOut.Attr, fsStat.Stat)
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doForget(req Req, nodeid uint64) {
@@ -271,6 +271,7 @@ func doGetattr(req Req, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 
 	getattrIn := (*req.Arg).(kernel.FuseGetattrIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Getattr: %+v \n", getattrIn)
@@ -287,17 +288,16 @@ func doGetattr(req Req, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 			setFuseAttr(&attrOut.Attr, fsStat.Stat)
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
 
+	return res
 }
 
 func doSetattr(req Req, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 
 	setattrIn := (*req.Arg).(kernel.FuseSetattrIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Setattr: %+v \n", setattrIn)
@@ -316,14 +316,15 @@ func doSetattr(req Req, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 			setFuseAttr(&attrOut.Attr, fsStat.Stat)
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doReadlink(req Req, nodeid uint64, attrOut *kernel.FuseReadlinkOut) int32 {
+
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Println("Readlink")
@@ -337,16 +338,16 @@ func doReadlink(req Req, nodeid uint64, attrOut *kernel.FuseReadlinkOut) int32 {
 			attrOut.Path = path
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doMknod(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	mknodIn := (*req.Arg).(kernel.FuseMknodIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Mknod: %+v \n", mknodIn)
@@ -366,16 +367,16 @@ func doMknod(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 			setFuseAttr(&entryOut.Attr, stat.Stat)
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doMkdir(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	mkdirIn := (*req.Arg).(kernel.FuseMkdirIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Mkdir: %+v \n", mkdirIn)
@@ -395,16 +396,16 @@ func doMkdir(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 			setFuseAttr(&entryOut.Attr, stat.Stat)
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doUnlink(req Req, nodeid uint64) int32 {
 
 	unlinkIn := (*req.Arg).(kernel.FuseUnlinkIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Unlink: %+v \n", unlinkIn)
@@ -412,18 +413,18 @@ func doUnlink(req Req, nodeid uint64) int32 {
 
 	if se.Opts != nil && se.Opts.Unlink != nil {
 
-		res := (*se.Opts.Unlink)(req, nodeid, unlinkIn.Path)
+		res = (*se.Opts.Unlink)(req, nodeid, unlinkIn.Path)
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doRmdir(req Req, nodeid uint64) int32 {
 
 	rmdirIn := (*req.Arg).(kernel.FuseRmdirIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Rmdir: %+v \n", rmdirIn)
@@ -431,19 +432,18 @@ func doRmdir(req Req, nodeid uint64) int32 {
 
 	if se.Opts != nil && se.Opts.Rmdir != nil {
 
-		res := (*se.Opts.Rmdir)(req, nodeid, rmdirIn.Path)
+		res = (*se.Opts.Rmdir)(req, nodeid, rmdirIn.Path)
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
 
+	return res
 }
 
 func doSymlink(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	symlinkIn := (*req.Arg).(kernel.FuseSymlinkIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Symlink: %+v \n", symlinkIn)
@@ -463,16 +463,16 @@ func doSymlink(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 			setFuseAttr(&entryOut.Attr, stat.Stat)
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doRename(req Req, nodeid uint64) int32 {
 
 	renameIn := (*req.Arg).(kernel.FuseRenameIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Rename: %+v \n", renameIn)
@@ -480,18 +480,18 @@ func doRename(req Req, nodeid uint64) int32 {
 
 	if se.Opts != nil && se.Opts.Rename != nil {
 
-		res := (*se.Opts.Rename)(req, nodeid, renameIn.OldName, renameIn.NewDir, renameIn.NewName)
+		res = (*se.Opts.Rename)(req, nodeid, renameIn.OldName, renameIn.NewDir, renameIn.NewName)
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 
 }
 
 func doRename2(req Req, nodeid uint64) int32 {
 	renameIn := (*req.Arg).(kernel.FuseRename2In)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Rename: %+v \n", renameIn)
@@ -499,18 +499,18 @@ func doRename2(req Req, nodeid uint64) int32 {
 
 	if se.Opts != nil && se.Opts.Rename != nil {
 
-		res := (*se.Opts.Rename)(req, nodeid, renameIn.OldName, renameIn.NewDir, renameIn.NewName)
+		res = (*se.Opts.Rename)(req, nodeid, renameIn.OldName, renameIn.NewDir, renameIn.NewName)
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doLink(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	linklIn := (*req.Arg).(kernel.FuseLinkIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Link: %+v \n", linklIn)
@@ -530,16 +530,16 @@ func doLink(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 			setFuseAttr(&entryOut.Attr, stat.Stat)
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doOpen(req Req, nodeid uint64, openOut *kernel.FuseOpenOut) int32 {
 
 	openIn := (*req.Arg).(kernel.FuseOpenIn)
 	se := req.session
+	var res int32 = errno.SUCCESS
 
 	if se.Debug {
 		log.Trace.Printf("Open: %+v \n", openIn)
@@ -550,22 +550,19 @@ func doOpen(req Req, nodeid uint64, openOut *kernel.FuseOpenOut) int32 {
 
 	if se.Opts != nil && se.Opts.Open != nil {
 
-		res := (*se.Opts.Open)(req, nodeid, &fi)
-
-		setOpenOut(openOut, fi)
-
-		return res
-	} else {
-
-		setOpenOut(openOut, fi)
-		return errno.SUCCESS
+		res = (*se.Opts.Open)(req, nodeid, &fi)
 	}
+
+	setOpenOut(openOut, fi)
+
+	return res
 }
 
 func doRead(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 
 	readIn := (*req.Arg).(kernel.FuseReadIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Read: %v \n", readIn)
@@ -587,17 +584,16 @@ func doRead(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 			readOut.Content = buf
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
 
+	return res
 }
 
 func doWrite(req Req, nodeid uint64, writeOut *kernel.FuseWriteOut) int32 {
 
 	writeIn := (*req.Arg).(kernel.FuseWriteIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Write: %v \n", writeIn)
@@ -618,20 +614,19 @@ func doWrite(req Req, nodeid uint64, writeOut *kernel.FuseWriteOut) int32 {
 			fi.Flags = writeIn.Flags
 		}
 
-		size, res := (*se.Opts.Write)(req, nodeid, writeIn.Buf, writeIn.Offset, fi)
-
+		var size uint32
+		size, res = (*se.Opts.Write)(req, nodeid, writeIn.Buf, writeIn.Offset, fi)
 		writeOut.Size = size
-
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doFlush(req Req, nodeid uint64) int32 {
 
 	flushIn := (*req.Arg).(kernel.FuseFlushIn)
 	se := req.session
+	var res int32 = errno.SUCCESS
 
 	if se.Debug {
 		log.Trace.Printf("Flush: %+v \n", flushIn)
@@ -648,18 +643,18 @@ func doFlush(req Req, nodeid uint64) int32 {
 			fi.LockOwner = flushIn.LockOwner
 		}
 
-		res := (*se.Opts.Flush)(req, nodeid, fi)
+		res = (*se.Opts.Flush)(req, nodeid, fi)
 
-		return res
-	} else {
-		return errno.SUCCESS
 	}
+
+	return res
 }
 
 func doFsync(req Req, nodeid uint64) int32 {
 
 	fsyncIn := (*req.Arg).(kernel.FuseFsyncIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Fsync: %v \n", fsyncIn)
@@ -673,18 +668,18 @@ func doFsync(req Req, nodeid uint64) int32 {
 
 		datasync := fsyncIn.FsyncFlags & 1
 
-		res := (*se.Opts.Fsync)(req, nodeid, datasync, fi)
+		res = (*se.Opts.Fsync)(req, nodeid, datasync, fi)
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doOpendir(req Req, nodeid uint64, openOut *kernel.FuseOpenOut) int32 {
 
 	openIn := (*req.Arg).(kernel.FuseOpenIn)
 	se := req.session
+	var res int32 = errno.SUCCESS
 
 	if se.Debug {
 		log.Trace.Printf("Opendir: %+v \n", openIn)
@@ -694,22 +689,19 @@ func doOpendir(req Req, nodeid uint64, openOut *kernel.FuseOpenOut) int32 {
 	fi.Flags = openIn.Flags
 	if se.Opts != nil && se.Opts.Opendir != nil {
 
-		res := (*se.Opts.Opendir)(req, nodeid, &fi)
+		res = (*se.Opts.Opendir)(req, nodeid, &fi)
 
-		setOpenOut(openOut, fi)
-
-		return res
-	} else {
-		setOpenOut(openOut, fi)
-
-		return errno.SUCCESS
 	}
+	setOpenOut(openOut, fi)
+
+	return res
 }
 
 func doReaddir(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 
 	readIn := (*req.Arg).(kernel.FuseReadIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Readdir: %+v \n", readIn)
@@ -731,9 +723,11 @@ func doReaddir(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 
 				var preOff uint64
 
-				for i, _ := range dirList {
+				for _, val := range dirList {
 
-					dirent := kernel.FuseDirent(dirList[i])
+					dir := val
+
+					dirent := kernel.FuseDirent(dir)
 
 					dirb, _ := dirent.ToBinary(&preOff)
 					// 判断是否超过readIn.Size的大小限制
@@ -750,17 +744,16 @@ func doReaddir(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 			readOut.Content = buf.Bytes()
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
 
+	return res
 }
 
 func doRelease(req Req, nodeid uint64) int32 {
 
 	releaseIn := (*req.Arg).(kernel.FuseReleaseIn)
 	se := req.session
+	var res int32 = errno.SUCCESS
 
 	if se.Debug {
 		log.Trace.Printf("Release: %+v \n", releaseIn)
@@ -772,19 +765,18 @@ func doRelease(req Req, nodeid uint64) int32 {
 		fi.Flags = releaseIn.Flags
 		fi.Fh = releaseIn.Fh
 
-		res := (*se.Opts.Release)(req, nodeid, fi)
+		res = (*se.Opts.Release)(req, nodeid, fi)
 
-		return res
-	} else {
-		return errno.SUCCESS
 	}
 
+	return res
 }
 
 func doReleasedir(req Req, nodeid uint64) int32 {
 
 	releasedirIn := (*req.Arg).(kernel.FuseReleaseIn)
 	se := req.session
+	var res int32 = errno.SUCCESS
 
 	if se.Debug {
 		log.Trace.Printf("Releasedir: %+v \n", releasedirIn)
@@ -796,19 +788,18 @@ func doReleasedir(req Req, nodeid uint64) int32 {
 		fi.Flags = releasedirIn.Flags
 		fi.Fh = releasedirIn.Fh
 
-		res := (*se.Opts.Releasedir)(req, nodeid, fi)
+		res = (*se.Opts.Releasedir)(req, nodeid, fi)
 
-		return res
-	} else {
-		return errno.SUCCESS
 	}
 
+	return res
 }
 
 func doFsyncdir(req Req, nodeid uint64) int32 {
 
 	fsyncdirIn := (*req.Arg).(kernel.FuseFsyncIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Fsyncdir: %+v \n", fsyncdirIn)
@@ -822,18 +813,17 @@ func doFsyncdir(req Req, nodeid uint64) int32 {
 
 		datasync := fsyncdirIn.FsyncFlags & 1
 
-		res := (*se.Opts.Fsyncdir)(req, nodeid, datasync, fi)
+		res = (*se.Opts.Fsyncdir)(req, nodeid, datasync, fi)
 
-		return res
-
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doStatfs(req Req, nodeid uint64, statfsOut *kernel.FuseStatfsOut) int32 {
 
 	se := req.session
+	var res int32 = errno.SUCCESS
 
 	if se.Debug {
 		log.Trace.Println("Statfs")
@@ -845,10 +835,8 @@ func doStatfs(req Req, nodeid uint64, statfsOut *kernel.FuseStatfsOut) int32 {
 
 		if res == errno.SUCCESS {
 			statfsOut.St = kernel.FuseStatfs(*statfs)
-
 		}
 
-		return res
 	} else {
 		statfs := kernel.FuseStatfs{}
 		statfs.NameLen = 255
@@ -856,14 +844,16 @@ func doStatfs(req Req, nodeid uint64, statfsOut *kernel.FuseStatfsOut) int32 {
 
 		statfsOut.St = statfs
 
-		return errno.SUCCESS
 	}
+
+	return res
 }
 
 func doSetxattr(req Req, nodeid uint64) int32 {
 
 	setxattrIn := (*req.Arg).(kernel.FuseSetxattrIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Setxattr: %+v \n", setxattrIn)
@@ -871,19 +861,18 @@ func doSetxattr(req Req, nodeid uint64) int32 {
 
 	if se.Opts != nil && se.Opts.Setxattr != nil {
 
-		res := (*se.Opts.Setxattr)(req, nodeid, setxattrIn.Name, setxattrIn.Value, setxattrIn.Flags)
+		res = (*se.Opts.Setxattr)(req, nodeid, setxattrIn.Name, setxattrIn.Value, setxattrIn.Flags)
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
 
+	return res
 }
 
 func doGetxattr(req Req, nodeid uint64, getxattrOut *kernel.FuseGetxattrOut) int32 {
 
 	getxattrIn := (*req.Arg).(kernel.FuseGetxattrIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Getxattr: %+v \n", getxattrIn)
@@ -891,22 +880,23 @@ func doGetxattr(req Req, nodeid uint64, getxattrOut *kernel.FuseGetxattrOut) int
 
 	if se.Opts != nil && se.Opts.Getxattr != nil {
 
-		value, res := (*se.Opts.Getxattr)(req, nodeid, getxattrIn.Name, getxattrIn.Size)
+		var value string
+		value, res = (*se.Opts.Getxattr)(req, nodeid, getxattrIn.Name, getxattrIn.Size)
 
 		size := len(value)
 		getxattrOut.Size = uint32(size)
 		getxattrOut.Value = kernel.XattrVal(value)
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doListxattr(req Req, nodeid uint64, listxattrOut *kernel.FuseGetxattrOut) int32 {
 
 	listxattrIn := (*req.Arg).(kernel.FuseGetxattrIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Listxattr: %+v \n", listxattrIn)
@@ -914,7 +904,8 @@ func doListxattr(req Req, nodeid uint64, listxattrOut *kernel.FuseGetxattrOut) i
 
 	if se.Opts != nil && se.Opts.Listxattr != nil {
 
-		attrlist, res := (*se.Opts.Listxattr)(req, nodeid, listxattrIn.Size)
+		var attrlist string
+		attrlist, res = (*se.Opts.Listxattr)(req, nodeid, listxattrIn.Size)
 
 		size := len(attrlist)
 		if listxattrIn.Size == 0 {
@@ -924,16 +915,16 @@ func doListxattr(req Req, nodeid uint64, listxattrOut *kernel.FuseGetxattrOut) i
 			listxattrOut.Value = kernel.XattrVal(attrlist)
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doRemovexattr(req Req, nodeid uint64) int32 {
 
 	removexattrIn := (*req.Arg).(kernel.FuseRemovexattrIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Removexattr: %+v \n", removexattrIn)
@@ -941,18 +932,18 @@ func doRemovexattr(req Req, nodeid uint64) int32 {
 
 	if se.Opts != nil && se.Opts.Removexattr != nil {
 
-		res := (*se.Opts.Removexattr)(req, nodeid, removexattrIn.Name)
+		res = (*se.Opts.Removexattr)(req, nodeid, removexattrIn.Name)
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doAccess(req Req, nodeid uint64) int32 {
 
 	accessIn := (*req.Arg).(kernel.FuseAccessIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Access: %+v \n", accessIn)
@@ -960,19 +951,18 @@ func doAccess(req Req, nodeid uint64) int32 {
 
 	if se.Opts != nil && se.Opts.Access != nil {
 
-		res := (*se.Opts.Access)(req, nodeid, accessIn.Mask)
+		res = (*se.Opts.Access)(req, nodeid, accessIn.Mask)
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
 
+	return res
 }
 
 func doCreate(req Req, nodeid uint64, createOut *kernel.FuseCreateOut) int32 {
 
 	createIn := (*req.Arg).(kernel.FuseCreateIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Create: %+v \n", createIn)
@@ -998,17 +988,16 @@ func doCreate(req Req, nodeid uint64, createOut *kernel.FuseCreateOut) int32 {
 			setOpenOut(&createOut.Open, fi)
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
 
+	return res
 }
 
 func doGetlk(req Req, nodeid uint64, getlkOut *kernel.FuseLkOut) int32 {
 
 	getlkIn := (*req.Arg).(kernel.FuseLkIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Getlk: %+v \n", getlkIn)
@@ -1023,15 +1012,13 @@ func doGetlk(req Req, nodeid uint64, getlkOut *kernel.FuseLkOut) int32 {
 		fi.LockOwner = getlkIn.Owner
 		convertFuseFileLock(getlkIn.Lk, &flock)
 
-		res := (*se.Opts.Getlk)(req, nodeid, fi, &flock)
+		res = (*se.Opts.Getlk)(req, nodeid, fi, &flock)
 
 		setFuseLkOut(flock, getlkOut)
 
-		return res
-
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doSetlk(req Req, nodeid uint64) int32 {
@@ -1046,13 +1033,13 @@ func doSetlkCommon(req Req, nodeid uint64, lksleep int) int32 {
 
 	setlkIn := (*req.Arg).(kernel.FuseLkIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Setlk: %+v \n", setlkIn)
 	}
 
 	if se.Opts != nil && se.Opts.Setlk != nil {
-		var res int32
 
 		fi := NewFuseFileInfo()
 		var flock = Flock{}
@@ -1085,17 +1072,16 @@ func doSetlkCommon(req Req, nodeid uint64, lksleep int) int32 {
 			res = (*se.Opts.Setlk)(req, nodeid, fi, flock, lksleep)
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
 
+	return res
 }
 
 func doBmap(req Req, nodeid uint64, bmapOut *kernel.FuseBmapOut) int32 {
 
 	bmapIn := (*req.Arg).(kernel.FuseBmapIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Bmap: %+v \n", bmapIn)
@@ -1105,20 +1091,20 @@ func doBmap(req Req, nodeid uint64, bmapOut *kernel.FuseBmapOut) int32 {
 
 		idx := bmapIn.Block
 
-		res := (*se.Opts.Bmap)(req, nodeid, bmapIn.BlockSize, &idx)
+		res = (*se.Opts.Bmap)(req, nodeid, bmapIn.BlockSize, &idx)
 
 		bmapOut.Block = idx
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 }
 
 func doIoctl(req Req, nodeid uint64, ioctlOut *kernel.FuseIoctlOut) int32 {
 
 	ioctlIn := (*req.Arg).(kernel.FuseIoctlIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Ioctl: %+v \n", ioctlIn)
@@ -1134,17 +1120,17 @@ func doIoctl(req Req, nodeid uint64, ioctlOut *kernel.FuseIoctlOut) int32 {
 
 		fi := NewFuseFileInfo()
 
-		ioctl, res := (*se.Opts.Ioctl)(req, nodeid, ioctlIn.Cmd, ioctlIn.Arg, fi, ioctlIn.InBuf, ioctlIn.OutSize)
+		var ioctl Ioctl
+		ioctl, res = (*se.Opts.Ioctl)(req, nodeid, ioctlIn.Cmd, ioctlIn.Arg, fi, ioctlIn.InBuf, ioctlIn.OutSize)
 
 		ioctlOut.Result = ioctl.Result
 		ioctlOut.Flags = ioctl.Flags
 		ioctlOut.InIovs = ioctl.InIovs
 		ioctlOut.OutIovs = ioctl.OutIovs
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
+
+	return res
 
 }
 
@@ -1152,6 +1138,7 @@ func doPoll(req Req, nodeid uint64, pollOut *kernel.FusePollOut) int32 {
 
 	pollIn := (*req.Arg).(kernel.FusePollIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Poll: %+v \n", pollIn)
@@ -1172,21 +1159,21 @@ func doPoll(req Req, nodeid uint64, pollOut *kernel.FusePollOut) int32 {
 			ph.Se = *se
 		}
 
-		revents, res := (*se.Opts.Poll)(req, nodeid, fi, ph)
+		var revents uint32
+		revents, res = (*se.Opts.Poll)(req, nodeid, fi, ph)
 
 		pollOut.Revents = revents
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
 
+	return res
 }
 
 func doFallocate(req Req, nodeid uint64) int32 {
 
 	fallocateIn := (*req.Arg).(kernel.FuseFallocateIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Fallocate: %+v \n", fallocateIn)
@@ -1197,13 +1184,11 @@ func doFallocate(req Req, nodeid uint64) int32 {
 		fi := NewFuseFileInfo()
 		fi.Fh = fallocateIn.Fh
 
-		res := (*se.Opts.Fallocate)(req, nodeid, fallocateIn.Mode, fallocateIn.Offset, fallocateIn.Length, fi)
+		res = (*se.Opts.Fallocate)(req, nodeid, fallocateIn.Mode, fallocateIn.Offset, fallocateIn.Length, fi)
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
 
+	return res
 }
 
 func doForgetMulti(req Req) {
@@ -1218,8 +1203,10 @@ func doForgetMulti(req Req) {
 
 		nodelist := make([]ForgetOne, batchForgetIn.Count)
 
-		for i, _ := range batchForgetIn.NodeList {
-			nodelist[i] = ForgetOne(batchForgetIn.NodeList[i])
+		for i, val := range batchForgetIn.NodeList {
+
+			node := val
+			nodelist[i] = ForgetOne(node)
 		}
 
 		(*se.Opts.ForgetMulti)(req, nodelist)
@@ -1235,6 +1222,7 @@ func doReaddirplus(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 
 	readIn := (*req.Arg).(kernel.FuseReadIn)
 	se := req.session
+	var res int32 = errno.ENOSYS
 
 	if se.Debug {
 		log.Trace.Printf("Readdirplus: %+v \n", readIn)
@@ -1252,11 +1240,9 @@ func doReaddirplus(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 			readOut.Content = content
 		}
 
-		return res
-	} else {
-		return errno.ENOSYS
 	}
 
+	return res
 }
 
 func doInterrupt(req Req) {
@@ -1271,13 +1257,13 @@ func doInterrupt(req Req) {
 	}
 }
 
-const OFFSET_MAX = 0x7fffffffffffffff
+const offsetMax = 0x7fffffffffffffff
 
 func convertFuseFileLock(lock kernel.FuseFileLock, flock *Flock) {
 	flock.Type = int16(lock.Type)
 	flock.Whence = int16(os.SEEK_SET)
 	flock.Start = int64(lock.Start)
-	if lock.End == OFFSET_MAX {
+	if lock.End == offsetMax {
 		flock.Len = 0
 	} else {
 		flock.Len = int64(lock.End - lock.Start + 1)
@@ -1290,7 +1276,7 @@ func setFuseLkOut(flock Flock, getlkOut *kernel.FuseLkOut) {
 	if flock.Type != syscall.F_UNLCK {
 		getlkOut.Lk.Start = uint64(flock.Start)
 		if flock.Len == 0 {
-			getlkOut.Lk.End = OFFSET_MAX
+			getlkOut.Lk.End = offsetMax
 		} else {
 			getlkOut.Lk.End = uint64(flock.Start + flock.Len - 1)
 		}
