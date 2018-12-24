@@ -9,7 +9,7 @@ import (
 	"github.com/mingforpc/fuse-go/fuse/log"
 )
 
-// The loop to read/write '/dev/fuse'
+// FuseLoop : the loop to read/write '/dev/fuse'
 func (se *Session) FuseLoop() {
 
 	if !se.IsInited() {
@@ -46,7 +46,7 @@ func (se *Session) FuseLoop() {
 			break
 		}
 
-		req := FuseReq{}
+		req := Req{}
 		req.Init(se, inheader)
 
 		// 用来处理各个请求的goroutine
@@ -131,6 +131,7 @@ func (se *Session) writeGoro() {
 
 }
 
+// Close : close fuse session
 func (se *Session) Close() {
 	se.Running = false
 	se.dev.Close()
@@ -181,7 +182,7 @@ func (se *Session) writeCmd(resp []byte) error {
 }
 
 // Distribute event to earch function
-func distribute(req *FuseReq, inHeader kernel.FuseInHeader, bcontent []byte) ([]byte, error) {
+func distribute(req *Req, inHeader kernel.FuseInHeader, bcontent []byte) ([]byte, error) {
 
 	var arg interface{}
 	var errnum int32

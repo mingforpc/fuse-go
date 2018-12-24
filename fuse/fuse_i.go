@@ -85,9 +85,9 @@ type Session struct {
 
 	connInfo *ConnInfo
 
-	FuseConfig *FuseConfig
+	FuseConfig *Config
 
-	Opts *FuseOpt
+	Opts *Opt
 
 	Debug bool
 
@@ -101,7 +101,8 @@ type Session struct {
 	userdata interface{} // user data
 }
 
-func NewFuseSession(mountpoint string, opts *FuseOpt, maxGoro int) *Session {
+// NewFuseSession : the function to new fuse session
+func NewFuseSession(mountpoint string, opts *Opt, maxGoro int) *Session {
 
 	se := &Session{}
 	se.Init(mountpoint, opts, maxGoro)
@@ -109,7 +110,8 @@ func NewFuseSession(mountpoint string, opts *FuseOpt, maxGoro int) *Session {
 	return se
 }
 
-func (se *Session) Init(mountpoint string, opts *FuseOpt, maxGoro int) {
+// Init : fuse session initialize function, it call by NewFuseSession default
+func (se *Session) Init(mountpoint string, opts *Opt, maxGoro int) {
 
 	se.Mountpoint = mountpoint
 
@@ -121,25 +123,28 @@ func (se *Session) Init(mountpoint string, opts *FuseOpt, maxGoro int) {
 
 	se.connInfo.TimeGran = 1
 
-	se.FuseConfig = &FuseConfig{}
+	se.FuseConfig = &Config{}
 	se.FuseConfig.Init()
 
 	se.inited = true
 }
 
+// IsInited : if session is initialized
 func (se *Session) IsInited() bool {
 	return se.inited
 }
 
+// SetDev : set "/dev/fuse" file, fd is the file descriptor of "/dev/fuse"
 func (se *Session) SetDev(fd uintptr) {
 	se.dev = os.NewFile(fd, "/dev/fuse")
 }
 
-type FuseReq struct {
+// Req : struct of fuse req
+type Req struct {
 	session *Session
 
 	Unique  uint64
-	Uid     uint32
+	UID     uint32
 	Gid     uint32
 	Pid     uint32
 	Padding uint32
@@ -147,20 +152,23 @@ type FuseReq struct {
 	Arg *interface{}
 }
 
-func (req *FuseReq) Init(se *Session, inheader kernel.FuseInHeader) {
+// Init : fuse req initialize function
+func (req *Req) Init(se *Session, inheader kernel.FuseInHeader) {
 	req.session = se
 	req.Unique = inheader.Unique
-	req.Uid = inheader.UID
+	req.UID = inheader.UID
 	req.Gid = inheader.Gid
 	req.Pid = inheader.Pid
 	req.Padding = inheader.Padding
 }
 
-func (req *FuseReq) GetFuseConfig() FuseConfig {
+// GetFuseConfig : return fuse configrtion
+func (req *Req) GetFuseConfig() Config {
 	return *req.session.FuseConfig
 }
 
-type FuseConfig struct {
+// Config : struct of fuse configuration
+type Config struct {
 	/* Fuse的开始时间的时间戳 */
 	FuseStartTime int64
 	/**
@@ -170,12 +178,14 @@ type FuseConfig struct {
 	AttrTimeout float64
 }
 
-func (config *FuseConfig) Init() {
+// Init : fuse configuration initialize function
+func (config *Config) Init() {
 	config.FuseStartTime = time.Now().UnixNano()
 	config.AttrTimeout = 2
 }
 
-type FuseFileInfo struct {
+// FileInfo : the fuse file infomation struct
+type FileInfo struct {
 
 	/** Open flags.	 Available in open() and release() */
 	Flags uint32
@@ -221,8 +231,9 @@ type FuseFileInfo struct {
 	PollEvent uint32
 }
 
-func NewFuseFileInfo() FuseFileInfo {
-	info := FuseFileInfo{}
+// NewFuseFileInfo : the function to new a fuse file info
+func NewFuseFileInfo() FileInfo {
+	info := FileInfo{}
 
 	info.Writepage = 1
 	info.DirectIo = 1
@@ -235,29 +246,31 @@ func NewFuseFileInfo() FuseFileInfo {
 	return info
 }
 
-type FusePollhandle struct {
+// Pollhandle : poll handle
+type Pollhandle struct {
 	Kh uint64
 	Se Session
 }
 
-type FuseStat struct {
+// FileStat : fuse file stat
+type FileStat struct {
 	Nodeid     uint64
 	Generation uint64
 	Stat       syscall.Stat_t
 }
 
-// The Dirent sturct provide to outside
-type FuseDirent kernel.FuseDirent
+// Dirent : The Dirent sturct provide to outside
+type Dirent kernel.FuseDirent
 
-// The FuseStatfs stuct provide to outside
-type FuseStatfs kernel.FuseStatfs
+// Statfs : The FuseStatfs stuct provide to outside
+type Statfs kernel.FuseStatfs
 
-// The FuseIoctlOut struct provide to outside
-type FuseIoctl kernel.FuseIoctlOut
+// Ioctl : The FuseIoctlOut struct provide to outside
+type Ioctl kernel.FuseIoctlOut
 
-// The FuseForgetOne struct provide to outside
-type FuseForgetOne kernel.FuseForgetOne
+// ForgetOne : The FuseForgetOne struct provide to outside
+type ForgetOne kernel.FuseForgetOne
 
-// The syscall.Flock_t struct provide to outside
+// Flock : The syscall.Flock_t struct provide to outside
 // This will make it easy if I want to change the struct of FuseFLock
-type FuseFlock syscall.Flock_t
+type Flock syscall.Flock_t

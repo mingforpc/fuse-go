@@ -11,7 +11,7 @@ import (
 	"github.com/mingforpc/fuse-go/fuse/log"
 )
 
-func doInit(req FuseReq, initOut *kernel.FuseInitOut) int32 {
+func doInit(req Req, initOut *kernel.FuseInitOut) int32 {
 
 	se := req.session
 	initIn := (*req.Arg).(kernel.FuseInitIn)
@@ -212,7 +212,7 @@ func doInit(req FuseReq, initOut *kernel.FuseInitOut) int32 {
 	return errno.SUCCESS
 }
 
-func doDestory(req FuseReq) {
+func doDestory(req Req) {
 	se := req.session
 
 	if se.Debug {
@@ -226,7 +226,7 @@ func doDestory(req FuseReq) {
 
 }
 
-func doLookup(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
+func doLookup(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 	lookupIn := (*req.Arg).(kernel.FuseLookupIn)
 	se := req.session
 
@@ -254,7 +254,7 @@ func doLookup(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 	}
 }
 
-func doForget(req FuseReq, nodeid uint64) {
+func doForget(req Req, nodeid uint64) {
 	forgetIn := (*req.Arg).(kernel.FuseForgetIn)
 	se := req.session
 
@@ -267,7 +267,7 @@ func doForget(req FuseReq, nodeid uint64) {
 	}
 }
 
-func doGetattr(req FuseReq, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
+func doGetattr(req Req, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 
 	getattrIn := (*req.Arg).(kernel.FuseGetattrIn)
 	se := req.session
@@ -294,7 +294,7 @@ func doGetattr(req FuseReq, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 
 }
 
-func doSetattr(req FuseReq, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
+func doSetattr(req Req, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 
 	setattrIn := (*req.Arg).(kernel.FuseSetattrIn)
 	se := req.session
@@ -304,7 +304,7 @@ func doSetattr(req FuseReq, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 	}
 
 	if se.Opts != nil && se.Opts.Setattr != nil {
-		fsStat := FuseStat{}
+		fsStat := FileStat{}
 
 		setattrInToStat(setattrIn, &fsStat.Stat)
 
@@ -322,7 +322,7 @@ func doSetattr(req FuseReq, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 	}
 }
 
-func doReadlink(req FuseReq, nodeid uint64, attrOut *kernel.FuseReadlinkOut) int32 {
+func doReadlink(req Req, nodeid uint64, attrOut *kernel.FuseReadlinkOut) int32 {
 	se := req.session
 
 	if se.Debug {
@@ -343,7 +343,7 @@ func doReadlink(req FuseReq, nodeid uint64, attrOut *kernel.FuseReadlinkOut) int
 	}
 }
 
-func doMknod(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
+func doMknod(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	mknodIn := (*req.Arg).(kernel.FuseMknodIn)
 	se := req.session
@@ -372,7 +372,7 @@ func doMknod(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 	}
 }
 
-func doMkdir(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
+func doMkdir(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	mkdirIn := (*req.Arg).(kernel.FuseMkdirIn)
 	se := req.session
@@ -401,7 +401,7 @@ func doMkdir(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 	}
 }
 
-func doUnlink(req FuseReq, nodeid uint64) int32 {
+func doUnlink(req Req, nodeid uint64) int32 {
 
 	unlinkIn := (*req.Arg).(kernel.FuseUnlinkIn)
 	se := req.session
@@ -420,7 +420,7 @@ func doUnlink(req FuseReq, nodeid uint64) int32 {
 	}
 }
 
-func doRmdir(req FuseReq, nodeid uint64) int32 {
+func doRmdir(req Req, nodeid uint64) int32 {
 
 	rmdirIn := (*req.Arg).(kernel.FuseRmdirIn)
 	se := req.session
@@ -440,7 +440,7 @@ func doRmdir(req FuseReq, nodeid uint64) int32 {
 
 }
 
-func doSymlink(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
+func doSymlink(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	symlinkIn := (*req.Arg).(kernel.FuseSymlinkIn)
 	se := req.session
@@ -469,7 +469,7 @@ func doSymlink(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 
 	}
 }
 
-func doRename(req FuseReq, nodeid uint64) int32 {
+func doRename(req Req, nodeid uint64) int32 {
 
 	renameIn := (*req.Arg).(kernel.FuseRenameIn)
 	se := req.session
@@ -489,7 +489,7 @@ func doRename(req FuseReq, nodeid uint64) int32 {
 
 }
 
-func doRename2(req FuseReq, nodeid uint64) int32 {
+func doRename2(req Req, nodeid uint64) int32 {
 	renameIn := (*req.Arg).(kernel.FuseRename2In)
 	se := req.session
 
@@ -507,7 +507,7 @@ func doRename2(req FuseReq, nodeid uint64) int32 {
 	}
 }
 
-func doLink(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
+func doLink(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	linklIn := (*req.Arg).(kernel.FuseLinkIn)
 	se := req.session
@@ -536,7 +536,7 @@ func doLink(req FuseReq, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 	}
 }
 
-func doOpen(req FuseReq, nodeid uint64, openOut *kernel.FuseOpenOut) int32 {
+func doOpen(req Req, nodeid uint64, openOut *kernel.FuseOpenOut) int32 {
 
 	openIn := (*req.Arg).(kernel.FuseOpenIn)
 	se := req.session
@@ -562,7 +562,7 @@ func doOpen(req FuseReq, nodeid uint64, openOut *kernel.FuseOpenOut) int32 {
 	}
 }
 
-func doRead(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
+func doRead(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 
 	readIn := (*req.Arg).(kernel.FuseReadIn)
 	se := req.session
@@ -594,7 +594,7 @@ func doRead(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 
 }
 
-func doWrite(req FuseReq, nodeid uint64, writeOut *kernel.FuseWriteOut) int32 {
+func doWrite(req Req, nodeid uint64, writeOut *kernel.FuseWriteOut) int32 {
 
 	writeIn := (*req.Arg).(kernel.FuseWriteIn)
 	se := req.session
@@ -628,7 +628,7 @@ func doWrite(req FuseReq, nodeid uint64, writeOut *kernel.FuseWriteOut) int32 {
 	}
 }
 
-func doFlush(req FuseReq, nodeid uint64) int32 {
+func doFlush(req Req, nodeid uint64) int32 {
 
 	flushIn := (*req.Arg).(kernel.FuseFlushIn)
 	se := req.session
@@ -656,7 +656,7 @@ func doFlush(req FuseReq, nodeid uint64) int32 {
 	}
 }
 
-func doFsync(req FuseReq, nodeid uint64) int32 {
+func doFsync(req Req, nodeid uint64) int32 {
 
 	fsyncIn := (*req.Arg).(kernel.FuseFsyncIn)
 	se := req.session
@@ -681,7 +681,7 @@ func doFsync(req FuseReq, nodeid uint64) int32 {
 	}
 }
 
-func doOpendir(req FuseReq, nodeid uint64, openOut *kernel.FuseOpenOut) int32 {
+func doOpendir(req Req, nodeid uint64, openOut *kernel.FuseOpenOut) int32 {
 
 	openIn := (*req.Arg).(kernel.FuseOpenIn)
 	se := req.session
@@ -706,7 +706,7 @@ func doOpendir(req FuseReq, nodeid uint64, openOut *kernel.FuseOpenOut) int32 {
 	}
 }
 
-func doReaddir(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
+func doReaddir(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 
 	readIn := (*req.Arg).(kernel.FuseReadIn)
 	se := req.session
@@ -757,7 +757,7 @@ func doReaddir(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 
 }
 
-func doRelease(req FuseReq, nodeid uint64) int32 {
+func doRelease(req Req, nodeid uint64) int32 {
 
 	releaseIn := (*req.Arg).(kernel.FuseReleaseIn)
 	se := req.session
@@ -781,7 +781,7 @@ func doRelease(req FuseReq, nodeid uint64) int32 {
 
 }
 
-func doReleasedir(req FuseReq, nodeid uint64) int32 {
+func doReleasedir(req Req, nodeid uint64) int32 {
 
 	releasedirIn := (*req.Arg).(kernel.FuseReleaseIn)
 	se := req.session
@@ -805,7 +805,7 @@ func doReleasedir(req FuseReq, nodeid uint64) int32 {
 
 }
 
-func doFsyncdir(req FuseReq, nodeid uint64) int32 {
+func doFsyncdir(req Req, nodeid uint64) int32 {
 
 	fsyncdirIn := (*req.Arg).(kernel.FuseFsyncIn)
 	se := req.session
@@ -831,7 +831,7 @@ func doFsyncdir(req FuseReq, nodeid uint64) int32 {
 	}
 }
 
-func doStatfs(req FuseReq, nodeid uint64, statfsOut *kernel.FuseStatfsOut) int32 {
+func doStatfs(req Req, nodeid uint64, statfsOut *kernel.FuseStatfsOut) int32 {
 
 	se := req.session
 
@@ -860,7 +860,7 @@ func doStatfs(req FuseReq, nodeid uint64, statfsOut *kernel.FuseStatfsOut) int32
 	}
 }
 
-func doSetxattr(req FuseReq, nodeid uint64) int32 {
+func doSetxattr(req Req, nodeid uint64) int32 {
 
 	setxattrIn := (*req.Arg).(kernel.FuseSetxattrIn)
 	se := req.session
@@ -880,7 +880,7 @@ func doSetxattr(req FuseReq, nodeid uint64) int32 {
 
 }
 
-func doGetxattr(req FuseReq, nodeid uint64, getxattrOut *kernel.FuseGetxattrOut) int32 {
+func doGetxattr(req Req, nodeid uint64, getxattrOut *kernel.FuseGetxattrOut) int32 {
 
 	getxattrIn := (*req.Arg).(kernel.FuseGetxattrIn)
 	se := req.session
@@ -903,7 +903,7 @@ func doGetxattr(req FuseReq, nodeid uint64, getxattrOut *kernel.FuseGetxattrOut)
 	}
 }
 
-func doListxattr(req FuseReq, nodeid uint64, listxattrOut *kernel.FuseGetxattrOut) int32 {
+func doListxattr(req Req, nodeid uint64, listxattrOut *kernel.FuseGetxattrOut) int32 {
 
 	listxattrIn := (*req.Arg).(kernel.FuseGetxattrIn)
 	se := req.session
@@ -930,7 +930,7 @@ func doListxattr(req FuseReq, nodeid uint64, listxattrOut *kernel.FuseGetxattrOu
 	}
 }
 
-func doRemovexattr(req FuseReq, nodeid uint64) int32 {
+func doRemovexattr(req Req, nodeid uint64) int32 {
 
 	removexattrIn := (*req.Arg).(kernel.FuseRemovexattrIn)
 	se := req.session
@@ -949,7 +949,7 @@ func doRemovexattr(req FuseReq, nodeid uint64) int32 {
 	}
 }
 
-func doAccess(req FuseReq, nodeid uint64) int32 {
+func doAccess(req Req, nodeid uint64) int32 {
 
 	accessIn := (*req.Arg).(kernel.FuseAccessIn)
 	se := req.session
@@ -969,7 +969,7 @@ func doAccess(req FuseReq, nodeid uint64) int32 {
 
 }
 
-func doCreate(req FuseReq, nodeid uint64, createOut *kernel.FuseCreateOut) int32 {
+func doCreate(req Req, nodeid uint64, createOut *kernel.FuseCreateOut) int32 {
 
 	createIn := (*req.Arg).(kernel.FuseCreateIn)
 	se := req.session
@@ -1005,7 +1005,7 @@ func doCreate(req FuseReq, nodeid uint64, createOut *kernel.FuseCreateOut) int32
 
 }
 
-func doGetlk(req FuseReq, nodeid uint64, getlkOut *kernel.FuseLkOut) int32 {
+func doGetlk(req Req, nodeid uint64, getlkOut *kernel.FuseLkOut) int32 {
 
 	getlkIn := (*req.Arg).(kernel.FuseLkIn)
 	se := req.session
@@ -1017,7 +1017,7 @@ func doGetlk(req FuseReq, nodeid uint64, getlkOut *kernel.FuseLkOut) int32 {
 	if se.Opts != nil && se.Opts.Create != nil {
 
 		fi := NewFuseFileInfo()
-		var flock = FuseFlock{}
+		var flock = Flock{}
 
 		fi.Fh = getlkIn.Fh
 		fi.LockOwner = getlkIn.Owner
@@ -1034,15 +1034,15 @@ func doGetlk(req FuseReq, nodeid uint64, getlkOut *kernel.FuseLkOut) int32 {
 	}
 }
 
-func doSetlk(req FuseReq, nodeid uint64) int32 {
+func doSetlk(req Req, nodeid uint64) int32 {
 	return doSetlkCommon(req, nodeid, 0)
 }
 
-func doSetlkw(req FuseReq, nodeid uint64) int32 {
+func doSetlkw(req Req, nodeid uint64) int32 {
 	return doSetlkCommon(req, nodeid, 1)
 }
 
-func doSetlkCommon(req FuseReq, nodeid uint64, lksleep int) int32 {
+func doSetlkCommon(req Req, nodeid uint64, lksleep int) int32 {
 
 	setlkIn := (*req.Arg).(kernel.FuseLkIn)
 	se := req.session
@@ -1055,7 +1055,7 @@ func doSetlkCommon(req FuseReq, nodeid uint64, lksleep int) int32 {
 		var res int32
 
 		fi := NewFuseFileInfo()
-		var flock = FuseFlock{}
+		var flock = Flock{}
 
 		fi.Fh = setlkIn.Fh
 		fi.LockOwner = setlkIn.Owner
@@ -1092,7 +1092,7 @@ func doSetlkCommon(req FuseReq, nodeid uint64, lksleep int) int32 {
 
 }
 
-func doBmap(req FuseReq, nodeid uint64, bmapOut *kernel.FuseBmapOut) int32 {
+func doBmap(req Req, nodeid uint64, bmapOut *kernel.FuseBmapOut) int32 {
 
 	bmapIn := (*req.Arg).(kernel.FuseBmapIn)
 	se := req.session
@@ -1115,7 +1115,7 @@ func doBmap(req FuseReq, nodeid uint64, bmapOut *kernel.FuseBmapOut) int32 {
 	}
 }
 
-func doIoctl(req FuseReq, nodeid uint64, ioctlOut *kernel.FuseIoctlOut) int32 {
+func doIoctl(req Req, nodeid uint64, ioctlOut *kernel.FuseIoctlOut) int32 {
 
 	ioctlIn := (*req.Arg).(kernel.FuseIoctlIn)
 	se := req.session
@@ -1148,7 +1148,7 @@ func doIoctl(req FuseReq, nodeid uint64, ioctlOut *kernel.FuseIoctlOut) int32 {
 
 }
 
-func doPoll(req FuseReq, nodeid uint64, pollOut *kernel.FusePollOut) int32 {
+func doPoll(req Req, nodeid uint64, pollOut *kernel.FusePollOut) int32 {
 
 	pollIn := (*req.Arg).(kernel.FusePollIn)
 	se := req.session
@@ -1163,10 +1163,10 @@ func doPoll(req FuseReq, nodeid uint64, pollOut *kernel.FusePollOut) int32 {
 		fi.Fh = pollIn.Fh
 		fi.PollEvent = pollIn.Events
 
-		var ph *FusePollhandle
+		var ph *Pollhandle
 
 		if (pollIn.Flags & kernel.FusePollScheduleNotify) > 0 {
-			ph = &FusePollhandle{}
+			ph = &Pollhandle{}
 
 			ph.Kh = pollIn.Kh
 			ph.Se = *se
@@ -1183,7 +1183,7 @@ func doPoll(req FuseReq, nodeid uint64, pollOut *kernel.FusePollOut) int32 {
 
 }
 
-func doFallocate(req FuseReq, nodeid uint64) int32 {
+func doFallocate(req Req, nodeid uint64) int32 {
 
 	fallocateIn := (*req.Arg).(kernel.FuseFallocateIn)
 	se := req.session
@@ -1206,7 +1206,7 @@ func doFallocate(req FuseReq, nodeid uint64) int32 {
 
 }
 
-func doForgetMulti(req FuseReq) {
+func doForgetMulti(req Req) {
 	batchForgetIn := (*req.Arg).(kernel.FuseBatchForgetIn)
 	se := req.session
 
@@ -1216,10 +1216,10 @@ func doForgetMulti(req FuseReq) {
 
 	if se.Opts != nil && se.Opts.ForgetMulti != nil {
 
-		nodelist := make([]FuseForgetOne, batchForgetIn.Count)
+		nodelist := make([]ForgetOne, batchForgetIn.Count)
 
 		for i, _ := range batchForgetIn.NodeList {
-			nodelist[i] = FuseForgetOne(batchForgetIn.NodeList[i])
+			nodelist[i] = ForgetOne(batchForgetIn.NodeList[i])
 		}
 
 		(*se.Opts.ForgetMulti)(req, nodelist)
@@ -1231,7 +1231,7 @@ func doForgetMulti(req FuseReq) {
 	}
 }
 
-func doReaddirplus(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
+func doReaddirplus(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 
 	readIn := (*req.Arg).(kernel.FuseReadIn)
 	se := req.session
@@ -1259,7 +1259,7 @@ func doReaddirplus(req FuseReq, nodeid uint64, readOut *kernel.FuseReadOut) int3
 
 }
 
-func doInterrupt(req FuseReq) {
+func doInterrupt(req Req) {
 	se := req.session
 
 	if se.Debug {
@@ -1273,7 +1273,7 @@ func doInterrupt(req FuseReq) {
 
 const OFFSET_MAX = 0x7fffffffffffffff
 
-func convertFuseFileLock(lock kernel.FuseFileLock, flock *FuseFlock) {
+func convertFuseFileLock(lock kernel.FuseFileLock, flock *Flock) {
 	flock.Type = int16(lock.Type)
 	flock.Whence = int16(os.SEEK_SET)
 	flock.Start = int64(lock.Start)
@@ -1285,7 +1285,7 @@ func convertFuseFileLock(lock kernel.FuseFileLock, flock *FuseFlock) {
 	flock.Pid = int32(lock.Pid)
 }
 
-func setFuseLkOut(flock FuseFlock, getlkOut *kernel.FuseLkOut) {
+func setFuseLkOut(flock Flock, getlkOut *kernel.FuseLkOut) {
 	getlkOut.Lk.Type = uint32(flock.Type)
 	if flock.Type != syscall.F_UNLCK {
 		getlkOut.Lk.Start = uint64(flock.Start)
@@ -1331,7 +1331,7 @@ func setattrInToStat(setattrIn kernel.FuseSetattrIn, stat *syscall.Stat_t) {
 
 }
 
-func setOpenOut(openOut *kernel.FuseOpenOut, fi FuseFileInfo) {
+func setOpenOut(openOut *kernel.FuseOpenOut, fi FileInfo) {
 	openOut.Fh = fi.Fh
 
 	if fi.DirectIo > 0 {

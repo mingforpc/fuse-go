@@ -1,6 +1,7 @@
 package fuse
 
-type FuseOpt struct {
+// Opt : the struct to save the fuse operations
+type Opt struct {
 	/**
 	 * Init
 	 * Initialize filesystem
@@ -53,7 +54,7 @@ type FuseOpt struct {
 	 *
 	 * 根据文件名获取文件的属性
 	 */
-	Lookup *func(req FuseReq, parentId uint64, name string) (fsStat *FuseStat, res int32)
+	Lookup *func(req Req, parentId uint64, name string) (fsStat *FileStat, res int32)
 
 	/**
 	 * Forget about an inode
@@ -89,7 +90,7 @@ type FuseOpt struct {
 	 * nodeId: the inode number
 	 * nlookup: the number of lookups to forget
 	 */
-	Forget *func(req FuseReq, nodeid uint64, nlookup uint64)
+	Forget *func(req Req, nodeid uint64, nlookup uint64)
 
 	/**
 	 * Get file attributes.
@@ -108,7 +109,7 @@ type FuseOpt struct {
 	 * fsStat: stat the file stat
 	 * res: the errno to fs
 	 */
-	Getattr *func(req FuseReq, nodeid uint64) (fsStat *FuseStat, res int32)
+	Getattr *func(req Req, nodeid uint64) (fsStat *FileStat, res int32)
 
 	/**
 	 * Set file attributes
@@ -135,7 +136,7 @@ type FuseOpt struct {
 	 * toSet: bit mask of attributes which should be set
 	 * res: the errno to fs
 	 */
-	Setattr *func(req FuseReq, nodeid uint64, attr FuseStat, toSet uint32) (res int32)
+	Setattr *func(req Req, nodeid uint64, attr FileStat, toSet uint32) (res int32)
 
 	/**
 	 * Read symbolic link
@@ -146,7 +147,7 @@ type FuseOpt struct {
 	 * path: the contents of the symbolic link
 	 * res: the errno to fs. About readlink, please check [http://man7.org/linux/man-pages/man2/readlink.2.html]
 	 */
-	Readlink *func(req FuseReq, nodeid uint64) (path string, res int32)
+	Readlink *func(req Req, nodeid uint64) (path string, res int32)
 
 	/**
 	 * Create file node
@@ -163,7 +164,7 @@ type FuseOpt struct {
 	 * fsStat: the file stat
 	 * res: the errno to fs. About mknod, please check [http://man7.org/linux/man-pages/man2/mknod.2.html]
 	 */
-	Mknod *func(req FuseReq, parentid uint64, name string, mode uint32, rdev uint32) (fsStat *FuseStat, res int32)
+	Mknod *func(req Req, parentid uint64, name string, mode uint32, rdev uint32) (fsStat *FileStat, res int32)
 
 	/**
 	 * Create a directory
@@ -176,7 +177,7 @@ type FuseOpt struct {
 	 * fsStat: the file stat
 	 * res: the errno to fs. About mkdir, please check [http://man7.org/linux/man-pages/man2/mkdir.2.html]
 	 */
-	Mkdir *func(req FuseReq, parentid uint64, name string, mode uint32) (fsStat *FuseStat, res int32)
+	Mkdir *func(req Req, parentid uint64, name string, mode uint32) (fsStat *FileStat, res int32)
 
 	/**
 	 * Remove a directory
@@ -192,7 +193,7 @@ type FuseOpt struct {
 	 * name: to remove
 	 * res: the errno to fs. About unlink, please check [http://man7.org/linux/man-pages/man2/unlink.2.html]
 	 */
-	Unlink *func(req FuseReq, parentid uint64, name string) (res int32)
+	Unlink *func(req Req, parentid uint64, name string) (res int32)
 
 	/**
 	 * Remove a directory
@@ -207,7 +208,7 @@ type FuseOpt struct {
 	 * name: to remove
 	 * res: the errno to fs. About rmdir, please check [http://man7.org/linux/man-pages/man2/rmdir.2.html]
 	 */
-	Rmdir *func(req FuseReq, parentid uint64, name string) (res int32)
+	Rmdir *func(req Req, parentid uint64, name string) (res int32)
 
 	/**
 	 * Create a symbolic link
@@ -220,7 +221,7 @@ type FuseOpt struct {
 	 * fsStat: the file stat
 	 * res: the errno to fs. About symlink, please check[http://man7.org/linux/man-pages/man2/symlink.2.html]
 	 */
-	Symlink *func(req FuseReq, parentid uint64, link string, name string) (fsStat *FuseStat, res int32)
+	Symlink *func(req Req, parentid uint64, link string, name string) (fsStat *FileStat, res int32)
 
 	/** Rename a file
 	 *
@@ -250,7 +251,7 @@ type FuseOpt struct {
 	 * newname: new name
 	 * res: the errno to fs. About rename, please check[http://man7.org/linux/man-pages/man2/rename.2.html]
 	 */
-	Rename *func(req FuseReq, parentid uint64, name string, newparentid uint64, newname string) (res int32)
+	Rename *func(req Req, parentid uint64, name string, newparentid uint64, newname string) (res int32)
 
 	/**
 	 * Create a hard link
@@ -263,7 +264,7 @@ type FuseOpt struct {
 	 * fsStat: the new file stat
 	 * res: the errno to fs. About link, please check[http://man7.org/linux/man-pages/man2/link.2.html]
 	 */
-	Link *func(req FuseReq, oldnodeid uint64, newparentid uint64, newname string) (fsStat *FuseStat, res int32)
+	Link *func(req Req, oldnodeid uint64, newparentid uint64, newname string) (fsStat *FileStat, res int32)
 
 	/**
 	* Open a file
@@ -319,7 +320,7 @@ type FuseOpt struct {
 	* fi: file information
 	* res: the errno to fs. About open, please check[http://man7.org/linux/man-pages/man2/open.2.html]
 	*/
-	Open *func(req FuseReq, nodeid uint64, fi *FuseFileInfo) (res int32)
+	Open *func(req Req, nodeid uint64, fi *FileInfo) (res int32)
 
 	/**
 	 * Read data
@@ -343,7 +344,7 @@ type FuseOpt struct {
 	 * content: the content to read
 	 * res: the errno to fs. About read, please check[http://man7.org/linux/man-pages/man2/read.2.html]
 	 */
-	Read *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (content []byte, res int32)
+	Read *func(req Req, nodeid uint64, size uint32, offset uint64, fi FileInfo) (content []byte, res int32)
 
 	/**
 	 * Write data
@@ -369,7 +370,7 @@ type FuseOpt struct {
 	 * size: the size write to file
 	 * res: the errno to fs. About write, please check[http://man7.org/linux/man-pages/man2/write.2.html]
 	 */
-	Write *func(req FuseReq, nodeid uint64, buf []byte, offset uint64, fi FuseFileInfo) (size uint32, res int32)
+	Write *func(req Req, nodeid uint64, buf []byte, offset uint64, fi FileInfo) (size uint32, res int32)
 
 	/**
 	 * Flush method
@@ -404,7 +405,7 @@ type FuseOpt struct {
 	 * fi: file information
 	 * res: the errno to fs. About flush, please check[http://man7.org/linux/man-pages/man3/fflush.3.html](may be not correct)
 	 */
-	Flush *func(req FuseReq, nodeid uint64, fi FuseFileInfo) (res int32)
+	Flush *func(req Req, nodeid uint64, fi FileInfo) (res int32)
 
 	/**
 	 * Synchronize file contents
@@ -424,7 +425,7 @@ type FuseOpt struct {
 	 * fi: file information
 	 * res: the errno to fs. About fsync, please check[http://man7.org/linux/man-pages/man2/fsync.2.html]
 	 */
-	Fsync *func(req FuseReq, nodeid uint64, datasync uint32, fi FuseFileInfo) (res int32)
+	Fsync *func(req Req, nodeid uint64, datasync uint32, fi FileInfo) (res int32)
 
 	/**
 	 * Open a directory
@@ -445,7 +446,7 @@ type FuseOpt struct {
 	 * fi: file information
 	 * res: the errno to fs. About opendir, please check[http://man7.org/linux/man-pages/man3/opendir.3.html]
 	 */
-	Opendir *func(req FuseReq, nodeid uint64, fi *FuseFileInfo) (res int32)
+	Opendir *func(req Req, nodeid uint64, fi *FileInfo) (res int32)
 
 	/**
 	 * Read directory
@@ -473,7 +474,7 @@ type FuseOpt struct {
 	 * res: the errno to fs. About readdir, please check[http://man7.org/linux/man-pages/man3/readdir.3.html]
 	 *
 	 */
-	Readdir *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (direntList []FuseDirent, res int32)
+	Readdir *func(req Req, nodeid uint64, size uint32, offset uint64, fi FileInfo) (direntList []Dirent, res int32)
 
 	/**
 	 * Release an open directory
@@ -490,7 +491,7 @@ type FuseOpt struct {
 	 * fi: file information
 	 * res: the errno to fs.
 	 */
-	Releasedir *func(req FuseReq, nodeid uint64, fi FuseFileInfo) (res int32)
+	Releasedir *func(req Req, nodeid uint64, fi FileInfo) (res int32)
 
 	/**
 	 * Release an open file
@@ -515,7 +516,7 @@ type FuseOpt struct {
 	 * fi: file information
 	 * res: the errno to fs.
 	 */
-	Release *func(req FuseReq, nodeid uint64, fi FuseFileInfo) (res int32)
+	Release *func(req Req, nodeid uint64, fi FileInfo) (res int32)
 
 	/**
 	 * Synchronize directory contents
@@ -538,7 +539,7 @@ type FuseOpt struct {
 	 * fi: file information.
 	 * res: the errno to fs. About fsyncdir, please check[http://man7.org/linux/man-pages/man2/fsync.2.html]
 	 */
-	Fsyncdir *func(req FuseReq, nodeid uint64, datasync uint32, fi FuseFileInfo) (res int32)
+	Fsyncdir *func(req Req, nodeid uint64, datasync uint32, fi FileInfo) (res int32)
 
 	/**
 	 * Get file system statistics
@@ -549,7 +550,7 @@ type FuseOpt struct {
 	 * statfs: stat of file system
 	 * res: the errno to fs. About fsyncdir, please check[http://man7.org/linux/man-pages/man2/fstatfs.2.html]
 	 */
-	Statfs *func(req FuseReq, nodeid uint64) (statfs *FuseStatfs, res int32)
+	Statfs *func(req Req, nodeid uint64) (statfs *Statfs, res int32)
 
 	/**
 	 * Set an extended attribute
@@ -566,7 +567,7 @@ type FuseOpt struct {
 	 * flags: setxattr flags
 	 * res: the errno to fs. About setxattr, pease check[http://man7.org/linux/man-pages/man2/fsetxattr.2.html]
 	 */
-	Setxattr *func(req FuseReq, nodeid uint64, name string, value string, flags uint32) (res int32)
+	Setxattr *func(req Req, nodeid uint64, name string, value string, flags uint32) (res int32)
 
 	/**
 	 * Get an extended attribute
@@ -593,7 +594,7 @@ type FuseOpt struct {
 	 * value: value of the extended attribute
 	 * res: the errno to fs. About getxattr, pease check[http://man7.org/linux/man-pages/man2/fgetxattr.2.html]
 	 */
-	Getxattr *func(req FuseReq, nodeid uint64, name string, size uint32) (value string, res int32)
+	Getxattr *func(req Req, nodeid uint64, name string, size uint32) (value string, res int32)
 
 	/**
 	 * List extended attribute names
@@ -620,7 +621,7 @@ type FuseOpt struct {
 	 * list: the extended attributes names string, eatch name use '\0' to split it
 	 * res: the errno to fs. About getxattr, pease check[http://man7.org/linux/man-pages/man2/flistxattr.2.html]
 	 */
-	Listxattr *func(req FuseReq, nodeid uint64, size uint32) (list string, res int32)
+	Listxattr *func(req Req, nodeid uint64, size uint32) (list string, res int32)
 
 	/**
 	 * Remove an extended attribute
@@ -636,7 +637,7 @@ type FuseOpt struct {
 	 * name: name of the extended attribute
 	 * res: the errno to fs. About removexattr, pease check[http://man7.org/linux/man-pages/man2/removexattr.2.html]
 	 */
-	Removexattr *func(req FuseReq, nodeid uint64, name string) (res int32)
+	Removexattr *func(req Req, nodeid uint64, name string) (res int32)
 
 	/**
 	 * Check file access permissions
@@ -657,7 +658,7 @@ type FuseOpt struct {
 	 * mask: requested access mode
 	 * res: the errno to fs. About access, pease check[http://man7.org/linux/man-pages/man2/access.2.html]
 	 */
-	Access *func(req FuseReq, nodeid uint64, mask uint32) (res int32)
+	Access *func(req Req, nodeid uint64, mask uint32) (res int32)
 
 	/**
 	 * Create and open a file
@@ -685,7 +686,7 @@ type FuseOpt struct {
 	 * fsStat: file stat
 	 * res: the errno to fs.
 	 */
-	Create *func(req FuseReq, parentid uint64, name string, mode uint32, fi *FuseFileInfo) (fsStat *FuseStat, res int32)
+	Create *func(req Req, parentid uint64, name string, mode uint32, fi *FileInfo) (fsStat *FileStat, res int32)
 
 	/**
 	 * Test for a POSIX file lock
@@ -697,7 +698,7 @@ type FuseOpt struct {
 	 * lock: the region/type to test
 	 * res: the errno to fs. About getlk, please check [http://man7.org/linux/man-pages/man3/lockf.3.html]
 	 */
-	Getlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock *FuseFlock) (res int32)
+	Getlk *func(req Req, nodeid uint64, fi FileInfo, lock *Flock) (res int32)
 
 	/**
 	 * Acquire, modify or release a POSIX file lock
@@ -720,7 +721,7 @@ type FuseOpt struct {
 	 * sleep: locking operation may sleep
 	 * res: the errno to fs. About setlk, please check [http://man7.org/linux/man-pages/man3/lockf.3.html]
 	 */
-	Setlk *func(req FuseReq, nodeid uint64, fi FuseFileInfo, lock FuseFlock, lksleep int) (res int32)
+	Setlk *func(req Req, nodeid uint64, fi FileInfo, lock Flock, lksleep int) (res int32)
 
 	/**
 	 * Map block index within file to block index within device
@@ -740,7 +741,7 @@ type FuseOpt struct {
 	 * idx: block index within file
 	 * res: the errno to fs.
 	 */
-	Bmap *func(req FuseReq, nodeid uint64, blocksize uint32, idx *uint64) (res int32)
+	Bmap *func(req Req, nodeid uint64, blocksize uint32, idx *uint64) (res int32)
 
 	/**
 	 * Ioctl
@@ -762,7 +763,7 @@ type FuseOpt struct {
 	 * ioctl: result to kernel
 	 * res: the errno to fs. About ioctl, please check[http://man7.org/linux/man-pages/man2/ioctl.2.html]
 	 */
-	Ioctl *func(req FuseReq, nodeid uint64, cmd uint32, arg uint64, fi FuseFileInfo, inbuf []byte, outbufsz uint32) (ioctl FuseIoctl, res int32)
+	Ioctl *func(req Req, nodeid uint64, cmd uint32, arg uint64, fi FileInfo, inbuf []byte, outbufsz uint32) (ioctl Ioctl, res int32)
 
 	/**
 	 * Poll for IO readiness
@@ -792,7 +793,7 @@ type FuseOpt struct {
 	 * revents: returned events
 	 * res: the errno to fs. About poll, please check[http://man7.org/linux/man-pages/man2/poll.2.html]
 	 */
-	Poll *func(req FuseReq, nodeid uint64, fi FuseFileInfo, ph *FusePollhandle) (revents uint32, res int32)
+	Poll *func(req Req, nodeid uint64, fi FileInfo, ph *Pollhandle) (revents uint32, res int32)
 
 	/**
 	 * Forget about multiple inodes
@@ -804,7 +805,7 @@ type FuseOpt struct {
 	 * req: request handle
 	 * nodeList: the node list to forget
 	 */
-	ForgetMulti *func(req FuseReq, nodeList []FuseForgetOne)
+	ForgetMulti *func(req Req, nodeList []ForgetOne)
 
 	/**
 	 * Allocate requested space. If this function returns success then
@@ -826,7 +827,7 @@ type FuseOpt struct {
 	 * fi: file information
 	 * res: the errno to fs. About fallocate, please check[http://man7.org/linux/man-pages/man2/fallocate.2.html]
 	 */
-	Fallocate *func(req FuseReq, nodeid uint64, mode uint32, offset uint64, length uint64, fi FuseFileInfo) (res int32)
+	Fallocate *func(req Req, nodeid uint64, mode uint32, offset uint64, length uint64, fi FileInfo) (res int32)
 
 	/**
 	 * Read directory with attributes
@@ -851,7 +852,7 @@ type FuseOpt struct {
 	 * buf: result to kernel
 	 * res: the errno to fs. About readdirplus , please check[http://man7.org/linux/man-pages/man3/readdir.3.html]
 	 */
-	Readdirplus *func(req FuseReq, nodeid uint64, size uint32, offset uint64, fi FuseFileInfo) (buf []byte, res int32)
+	Readdirplus *func(req Req, nodeid uint64, size uint32, offset uint64, fi FileInfo) (buf []byte, res int32)
 
-	Interrupt *func(req FuseReq)
+	Interrupt *func(req Req)
 }
