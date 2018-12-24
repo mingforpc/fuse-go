@@ -26,7 +26,7 @@ func unixgramSocketpair() (l, r *os.File, err error) {
 	return
 }
 
-// Create a FUSE FS on the specified mount point.  The returned
+// Mount : Create a FUSE FS on the specified mount point.  The returned
 // mount point is always absolute.
 func Mount(se *fuse.FuseSession) (err error) {
 	local, remote, err := unixgramSocketpair()
@@ -61,7 +61,7 @@ func Mount(se *fuse.FuseSession) (err error) {
 		return
 	}
 	if !w.Success() {
-		err = fmt.Errorf("fusermount exited with code %v\n", w.Sys())
+		err = fmt.Errorf("fusermount exited with code %v", w.Sys())
 		return
 	}
 
@@ -120,6 +120,7 @@ func lookPathFallback(file string, fallbackDir string) (string, error) {
 	return exec.LookPath(abs)
 }
 
+// Unmount : umount the mountpoint, should close fuse session first
 // 需要先把"/dev/fuse"文件关闭
 func Unmount(mountPoint string) (err error) {
 	bin, err := fusermountBinary()
@@ -131,7 +132,7 @@ func Unmount(mountPoint string) (err error) {
 	cmd.Stderr = &errBuf
 	err = cmd.Run()
 	if errBuf.Len() > 0 {
-		return fmt.Errorf("%s (code %v)\n",
+		return fmt.Errorf("%s (code %v)",
 			errBuf.String(), err)
 	}
 	return err

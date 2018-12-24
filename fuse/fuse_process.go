@@ -109,33 +109,33 @@ func doInit(req FuseReq, initOut *kernel.FuseInitOut) int32 {
 
 	// Default settings for modern filesystems.
 	// TODO: support write_buf, flock
-	if (se.connInfo.Capable & FUSE_CAP_ASYNC_READ) > 0 {
-		se.connInfo.Want |= FUSE_CAP_ASYNC_READ
+	if (se.connInfo.Capable & FuseCapAsyncRead) > 0 {
+		se.connInfo.Want |= FuseCapAsyncRead
 	}
-	if (se.connInfo.Capable & FUSE_CAP_PARALLEL_DIROPS) > 0 {
-		se.connInfo.Want |= FUSE_CAP_PARALLEL_DIROPS
+	if (se.connInfo.Capable & FuseCapParallelDirops) > 0 {
+		se.connInfo.Want |= FuseCapParallelDirops
 	}
-	if (se.connInfo.Capable & FUSE_CAP_AUTO_INVAL_DATA) > 0 {
-		se.connInfo.Want |= FUSE_CAP_AUTO_INVAL_DATA
+	if (se.connInfo.Capable & FuseCapAutoInvalData) > 0 {
+		se.connInfo.Want |= FuseCapAutoInvalData
 	}
-	if (se.connInfo.Capable & FUSE_CAP_HANDLE_KILLPRIV) > 0 {
-		se.connInfo.Want |= FUSE_CAP_HANDLE_KILLPRIV
+	if (se.connInfo.Capable & FuseCapHandleKillpriv) > 0 {
+		se.connInfo.Want |= FuseCapHandleKillpriv
 	}
-	if (se.connInfo.Capable & FUSE_CAP_ASYNC_DIO) > 0 {
-		se.connInfo.Want |= FUSE_CAP_ASYNC_DIO
+	if (se.connInfo.Capable & FuseCapAsyncDIO) > 0 {
+		se.connInfo.Want |= FuseCapAsyncDIO
 	}
-	if (se.connInfo.Capable & FUSE_CAP_IOCTL_DIR) > 0 {
-		se.connInfo.Want |= FUSE_CAP_IOCTL_DIR
+	if (se.connInfo.Capable & FuseCapIoctlDir) > 0 {
+		se.connInfo.Want |= FuseCapIoctlDir
 	}
-	if (se.connInfo.Capable & FUSE_CAP_ATOMIC_O_TRUNC) > 0 {
-		se.connInfo.Want |= FUSE_CAP_ATOMIC_O_TRUNC
+	if (se.connInfo.Capable & FuseCapAtomicOTrunc) > 0 {
+		se.connInfo.Want |= FuseCapAtomicOTrunc
 	}
 	if se.Opts.Getlk != nil && se.Opts.Setlk != nil {
-		se.connInfo.Want |= FUSE_CAP_POSIX_LOCKS
+		se.connInfo.Want |= FuseCapPosixLocks
 	}
 	if se.Opts.Readdirplus != nil {
-		se.connInfo.Want |= FUSE_CAP_READDIRPLUS
-		se.connInfo.Want |= FUSE_CAP_READDIRPLUS_AUTO
+		se.connInfo.Want |= FuseCapReaddirplus
+		se.connInfo.Want |= FuseCapReaddirplusAuto
 	}
 
 	// To set what we want fuse kenel to do
@@ -1126,7 +1126,7 @@ func doIoctl(req FuseReq, nodeid uint64, ioctlOut *kernel.FuseIoctlOut) int32 {
 
 	flags := ioctlIn.Flags
 
-	if (flags&kernel.FuseIoctlDir) > 0 && (se.connInfo.Want&FUSE_CAP_IOCTL_DIR) == 0 {
+	if (flags&kernel.FuseIoctlDir) > 0 && (se.connInfo.Want&FuseCapIoctlDir) == 0 {
 		return errno.ENOSYS
 	}
 

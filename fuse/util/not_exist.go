@@ -12,7 +12,7 @@ type notExistFile struct {
 	negativeTime int64
 }
 
-// if negative not timeout return true
+// isNegative : if negative not timeout return true
 // else return false
 func (file *notExistFile) isNegative() bool {
 
