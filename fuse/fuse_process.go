@@ -237,7 +237,9 @@ func doLookup(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	if se.Opts != nil && se.Opts.Lookup != nil {
 
-		fsStat, res := (*se.Opts.Lookup)(req, nodeid, lookupIn.Name)
+		var fsStat *FileStat
+
+		fsStat, res = (*se.Opts.Lookup)(req, nodeid, lookupIn.Name)
 
 		if res == errno.SUCCESS {
 			entryOut.NodeID = fsStat.Nodeid
@@ -279,7 +281,8 @@ func doGetattr(req Req, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 
 	if se.Opts != nil && se.Opts.Getattr != nil {
 
-		fsStat, res := (*se.Opts.Getattr)(req, nodeid)
+		var fsStat *FileStat
+		fsStat, res = (*se.Opts.Getattr)(req, nodeid)
 
 		if res == errno.SUCCESS {
 			attrOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
@@ -308,7 +311,7 @@ func doSetattr(req Req, nodeid uint64, attrOut *kernel.FuseAttrOut) int32 {
 
 		setattrInToStat(setattrIn, &fsStat.Stat)
 
-		res := (*se.Opts.Setattr)(req, nodeid, fsStat, setattrIn.Valid)
+		res = (*se.Opts.Setattr)(req, nodeid, fsStat, setattrIn.Valid)
 
 		if res == errno.SUCCESS {
 			attrOut.AttrValid = common.CalcTimeoutSec(se.FuseConfig.AttrTimeout)
@@ -332,7 +335,9 @@ func doReadlink(req Req, nodeid uint64, attrOut *kernel.FuseReadlinkOut) int32 {
 
 	if se.Opts != nil && se.Opts.Readlink != nil {
 
-		path, res := (*se.Opts.Readlink)(req, nodeid)
+		var path string
+
+		path, res = (*se.Opts.Readlink)(req, nodeid)
 
 		if res == errno.SUCCESS {
 			attrOut.Path = path
@@ -355,7 +360,9 @@ func doMknod(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	if se.Opts != nil && se.Opts.Mknod != nil {
 
-		stat, res := (*se.Opts.Mknod)(req, nodeid, mknodIn.Name, mknodIn.Mode, mknodIn.Rdev)
+		var stat *FileStat
+
+		stat, res = (*se.Opts.Mknod)(req, nodeid, mknodIn.Name, mknodIn.Mode, mknodIn.Rdev)
 
 		if res == errno.SUCCESS {
 			entryOut.NodeID = stat.Nodeid
@@ -384,7 +391,9 @@ func doMkdir(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	if se.Opts != nil && se.Opts.Mkdir != nil {
 
-		stat, res := (*se.Opts.Mkdir)(req, nodeid, mkdirIn.Name, mkdirIn.Mode)
+		var stat *FileStat
+
+		stat, res = (*se.Opts.Mkdir)(req, nodeid, mkdirIn.Name, mkdirIn.Mode)
 
 		if res == errno.SUCCESS {
 			entryOut.NodeID = stat.Nodeid
@@ -451,7 +460,9 @@ func doSymlink(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	if se.Opts != nil && se.Opts.Symlink != nil {
 
-		stat, res := (*se.Opts.Symlink)(req, nodeid, symlinkIn.LinkName, symlinkIn.Name)
+		var stat *FileStat
+
+		stat, res = (*se.Opts.Symlink)(req, nodeid, symlinkIn.LinkName, symlinkIn.Name)
 
 		if res == errno.SUCCESS {
 			entryOut.NodeID = stat.Nodeid
@@ -518,7 +529,9 @@ func doLink(req Req, nodeid uint64, entryOut *kernel.FuseEntryOut) int32 {
 
 	if se.Opts != nil && se.Opts.Link != nil {
 
-		stat, res := (*se.Opts.Link)(req, linklIn.OldNodeid, nodeid, linklIn.NewName)
+		var stat *FileStat
+
+		stat, res = (*se.Opts.Link)(req, linklIn.OldNodeid, nodeid, linklIn.NewName)
 
 		if res == errno.SUCCESS {
 			entryOut.NodeID = stat.Nodeid
@@ -578,7 +591,9 @@ func doRead(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 			fi.Flags = readIn.Flags
 		}
 
-		buf, res := (*se.Opts.Read)(req, nodeid, readIn.Size, readIn.Offset, fi)
+		var buf []byte
+
+		buf, res = (*se.Opts.Read)(req, nodeid, readIn.Size, readIn.Offset, fi)
 
 		if res == errno.SUCCESS {
 			readOut.Content = buf
@@ -710,10 +725,11 @@ func doReaddir(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 	if se.Opts != nil && se.Opts.Readdir != nil {
 
 		fi := NewFuseFileInfo()
-
 		fi.Fh = readIn.Fh
 
-		dirList, res := (*se.Opts.Readdir)(req, nodeid, readIn.Size, readIn.Offset, fi)
+		var dirList []Dirent
+
+		dirList, res = (*se.Opts.Readdir)(req, nodeid, readIn.Size, readIn.Offset, fi)
 
 		if res == errno.SUCCESS {
 
@@ -831,7 +847,8 @@ func doStatfs(req Req, nodeid uint64, statfsOut *kernel.FuseStatfsOut) int32 {
 
 	if se.Opts != nil && se.Opts.Statfs != nil {
 
-		statfs, res := (*se.Opts.Statfs)(req, nodeid)
+		var statfs *Statfs
+		statfs, res = (*se.Opts.Statfs)(req, nodeid)
 
 		if res == errno.SUCCESS {
 			statfsOut.St = kernel.FuseStatfs(*statfs)
@@ -973,7 +990,9 @@ func doCreate(req Req, nodeid uint64, createOut *kernel.FuseCreateOut) int32 {
 		fi := NewFuseFileInfo()
 		fi.Flags = createIn.Flags
 
-		stat, res := (*se.Opts.Create)(req, nodeid, createIn.Name, createIn.Mode, &fi)
+		var stat *FileStat
+
+		stat, res = (*se.Opts.Create)(req, nodeid, createIn.Name, createIn.Mode, &fi)
 
 		if res == errno.SUCCESS {
 
@@ -1231,10 +1250,11 @@ func doReaddirplus(req Req, nodeid uint64, readOut *kernel.FuseReadOut) int32 {
 	if se.Opts != nil && se.Opts.Readdirplus != nil {
 
 		fi := NewFuseFileInfo()
-
 		fi.Fh = readIn.Fh
 
-		content, res := (*se.Opts.Readdirplus)(req, nodeid, readIn.Size, readIn.Offset, fi)
+		var content []byte
+
+		content, res = (*se.Opts.Readdirplus)(req, nodeid, readIn.Size, readIn.Offset, fi)
 
 		if res == errno.SUCCESS {
 			readOut.Content = content

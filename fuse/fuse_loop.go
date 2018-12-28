@@ -107,6 +107,7 @@ func (se *Session) readGoro() {
 		}
 	}
 
+	// TODO: 不要在这里关闭readChan了，因为se.readCmd()有可能会block住，所以会导致se.Close()整个阻塞
 	close(se.readChan)
 
 }
