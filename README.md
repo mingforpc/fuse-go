@@ -84,7 +84,9 @@ Mount部分的代码，为了实现普通用户可以直接Mount，调用了`/bi
 
 ## 例子
 
-目前还没在项目里面写`example`，具体例子可以参考我下面的`hadoop-fs`
+`example`中有一个`hello`的简单例子，具体使用是`go build`后，`hello -mp {挂载的目录}`。
+
+更详细的例子可以参考我下面的`hadoop-fs`
 
 [https://github.com/mingforpc/hadoop-fs](https://github.com/mingforpc/hadoop-fs)
 
@@ -92,7 +94,8 @@ Mount部分的代码，为了实现普通用户可以直接Mount，调用了`/bi
 
 * ~~`errno`中的错误代码需要完善(急)~~(2018/12/21,已在`errno`中添加基本的错误代码)
 * ~~修改好注释和调整结构~~(2018/12/24)
-* 完成`example`中的例子
+* ~~完成`example`中的例子~~(2018/12/29)
+* 发现`Close()`会存在block的情况，需要解决(急)
 * 往`test`中添加测试用例
 * 测试各个系统上的兼容性(目前只在64位Ubuntu上进行)
 * 提供一些管理`inode`和`path`的工具类
