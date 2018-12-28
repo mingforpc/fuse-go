@@ -36,8 +36,9 @@ type NotExistManager struct {
 }
 
 // Init the function to initialize the map
-func (manager *NotExistManager) Init() {
+func (manager *NotExistManager) Init(NegativeTimeout int) {
 	manager.dict = make(map[string]*notExistFile)
+	manager.NegativeTimeout = NegativeTimeout
 }
 
 // Set the not exist filepath, negativeTimeout is how long will timeout.
@@ -53,7 +54,11 @@ func (manager *NotExistManager) Set(filepath string, negativeTimeout int) {
 	manager.lk.Lock()
 	manager.dict[filepath] = file
 	manager.lk.Unlock()
+}
 
+// SetDefault set the not exist filepath, negativeTimeout use default
+func (manager *NotExistManager) SetDefault(filepath string) {
+	manager.Set(filepath, manager.NegativeTimeout)
 }
 
 // Del the file path in map
