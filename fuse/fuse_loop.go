@@ -3,6 +3,9 @@ package fuse
 import (
 	"bytes"
 	"errors"
+	"syscall"
+
+	"github.com/mingforpc/fuse-go/fuse/evloop"
 
 	"github.com/mingforpc/fuse-go/fuse/errno"
 	"github.com/mingforpc/fuse-go/fuse/kernel"
@@ -90,15 +93,20 @@ func (se *Session) readGoro() {
 		}
 	}()
 
-	for se.Running {
+	el := se.evloop
 
+	handler := func(el *evloop.EvLoop, fd int, eventmask int, privdata interface{}) {
 		breq, err := se.readCmd()
 		if err != nil {
 
-			log.Error.Println(err)
-			// 读出错退出
+			if err == syscall.ENODEV {
 
-			break
+				se.Running = false
+			} else {
+				// 读出错退出
+				log.Error.Printf("err: %+v \n", err)
+				panic(err)
+			}
 		}
 
 		// Read 可能block很久，所以再判断一次
@@ -107,7 +115,17 @@ func (se *Session) readGoro() {
 		}
 	}
 
-	// TODO: 不要在这里关闭readChan了，因为se.readCmd()有可能会block住，所以会导致se.Close()整个阻塞
+	err := el.Register(se.devFd, evloop.EPOLLIN, handler, nil)
+
+	if err != nil {
+		panic(err)
+	}
+
+	for se.Running {
+		// wait 1 second
+		el.Process(1000)
+	}
+
 	close(se.readChan)
 
 }
@@ -135,7 +153,8 @@ func (se *Session) writeGoro() {
 // Close : close fuse session
 func (se *Session) Close() {
 	se.Running = false
-	se.dev.Close()
+
+	syscall.Close(se.devFd)
 
 	close(se.closeCh)
 	close(se.writeChan)
@@ -146,7 +165,8 @@ func (se *Session) Close() {
 func (se *Session) readCmd() ([]byte, error) {
 	var cmdLenBytes = make([]byte, se.bufsize)
 
-	n, err := se.dev.Read(cmdLenBytes)
+	n, err := syscall.Read(se.devFd, cmdLenBytes)
+
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +197,7 @@ func (se *Session) writeCmd(resp []byte) error {
 	if se.Debug {
 		log.Trace.Printf("resp[%+v] \n", resp)
 	}
-	_, err := se.dev.Write(resp)
+	_, err := syscall.Write(se.devFd, resp)
 
 	return err
 }

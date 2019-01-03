@@ -1,10 +1,10 @@
 package fuse
 
 import (
-	"os"
 	"syscall"
 	"time"
 
+	"github.com/mingforpc/fuse-go/fuse/evloop"
 	"github.com/mingforpc/fuse-go/fuse/kernel"
 )
 
@@ -13,6 +13,9 @@ const KernelBufPages = 32
 
 // HeaderSize : room needed in buffer to accommodate header
 const HeaderSize = 0x1000
+
+// FuseEvLoopSize : default event loop size, only use to read '/dev/fuse' for now
+const FuseEvLoopSize = 128
 
 /**
  * Flags returned by the OPEN request
@@ -75,7 +78,7 @@ type ConnInfo struct {
 type Session struct {
 	Mountpoint string
 
-	dev *os.File // "dev/fuse"
+	devFd int // "dev/fuse" fd
 
 	inited bool // is inited or not
 
@@ -83,9 +86,9 @@ type Session struct {
 
 	maxGoro int // max goroutine num
 
-	connInfo *ConnInfo
+	connInfo *ConnInfo // Fuse Connection Info
 
-	FuseConfig *Config
+	FuseConfig *Config // fuse configuration
 
 	Opts *Opt
 
@@ -99,6 +102,8 @@ type Session struct {
 	closeCh chan interface{}
 
 	userdata interface{} // user data
+
+	evloop *evloop.EvLoop
 }
 
 // NewFuseSession : the function to new fuse session
@@ -126,6 +131,9 @@ func (se *Session) Init(mountpoint string, opts *Opt, maxGoro int) {
 	se.FuseConfig = &Config{}
 	se.FuseConfig.Init()
 
+	evloop := evloop.NewEvLoop(FuseEvLoopSize)
+	se.evloop = &evloop
+
 	se.inited = true
 }
 
@@ -134,9 +142,9 @@ func (se *Session) IsInited() bool {
 	return se.inited
 }
 
-// SetDev : set "/dev/fuse" file, fd is the file descriptor of "/dev/fuse"
-func (se *Session) SetDev(fd uintptr) {
-	se.dev = os.NewFile(fd, "/dev/fuse")
+// SetDev : set "/dev/fuse", fd is the file descriptor of "/dev/fuse"
+func (se *Session) SetDev(fd int) {
+	se.devFd = fd
 }
 
 // Req : struct of fuse req

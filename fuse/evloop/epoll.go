@@ -1,19 +1,29 @@
 package evloop
 
-import "syscall"
+import (
+	"errors"
+	"syscall"
+)
+
+// Epoll register type, add or modify
+const (
+	EpollRegisterAdd = syscall.EPOLL_CTL_ADD
+	EpollRegisterMod = syscall.EPOLL_CTL_MOD
+)
+
+const (
+	EPOLLIN  = syscall.EPOLLIN
+	EPOLLOUT = syscall.EPOLLOUT
+	EPOLLERR = syscall.EPOLLERR
+)
+
+var errRegisterType = errors.New("worng register type, should be EpollRegisterAdd or EpollRegisterMod")
 
 type epoll struct {
 	fd int // epoll fd
 
-	listenFd map[int]int // to save the fd
-
 	maxSize int                  // the max number in epoll
 	events  []syscall.EpollEvent // the array to receive events
-}
-
-type event struct {
-	events uint32
-	fd     int32
 }
 
 // newEpoll create epoll object
@@ -23,23 +33,21 @@ func newEpoll(maxSize int) epoll {
 		panic(err)
 	}
 
-	ep := epoll{fd: fd, listenFd: make(map[int]int), maxSize: maxSize, events: make([]syscall.EpollEvent, maxSize)}
+	ep := epoll{fd: fd, maxSize: maxSize, events: make([]syscall.EpollEvent, maxSize)}
 
 	return ep
 }
 
 // register register event in epoll
-func (ep *epoll) register(fd int, eventmask int) error {
+// reType is EpollRegisterAdd or EpollRegisterMod
+func (ep *epoll) register(fd int, eventmask int, reType int) error {
 	event := syscall.EpollEvent{Fd: int32(fd), Events: uint32(eventmask)}
 
-	op := syscall.EPOLL_CTL_ADD
-	if ep.listenFd[fd] == 0 {
-		ep.listenFd[fd] = eventmask
-	} else {
-		op = syscall.EPOLL_CTL_MOD
+	if reType != EpollRegisterAdd && reType != EpollRegisterMod {
+		panic(errRegisterType)
 	}
 
-	err := syscall.EpollCtl(ep.fd, op, fd, &event)
+	err := syscall.EpollCtl(ep.fd, reType, fd, &event)
 
 	return err
 }
@@ -48,11 +56,6 @@ func (ep *epoll) register(fd int, eventmask int) error {
 func (ep *epoll) unregister(fd int) error {
 
 	err := syscall.EpollCtl(ep.fd, syscall.EPOLL_CTL_DEL, fd, nil)
-
-	if err == nil {
-		delete(ep.listenFd, fd)
-	}
-
 	return err
 }
 

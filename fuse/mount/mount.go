@@ -43,7 +43,7 @@ func Mount(se *fuse.Session) (err error) {
 	}
 
 	cmd := []string{bin, se.Mountpoint}
-	opts := []string{"rw", "nosuid", "nodev"}
+	opts := []string{"rw", "nosuid", "nodev", "async", "noexec"}
 	cmd = append(cmd, "-o", strings.Join(opts, ","))
 
 	proc, err := os.StartProcess(bin,
@@ -71,7 +71,7 @@ func Mount(se *fuse.Session) (err error) {
 		return err
 	}
 
-	se.SetDev(uintptr(fd))
+	se.SetDev(fd)
 
 	// golang sets CLOEXEC on file descriptors when they are
 	// acquired through normal operations (e.g. open).
