@@ -2,62 +2,26 @@ package test
 
 import (
 	"errors"
+	"sync"
 	"syscall"
 
 	"github.com/mingforpc/fuse-go/fuse"
 	"github.com/mingforpc/fuse-go/fuse/errno"
 )
 
-var se *fuse.Session
-
-func init() {
-	se = NewTestFuse("./test_mountpoint")
-}
-
 var helloName = "hello"
 var helloContent = "hello world!\n"
 
-func helloStat(nodeid uint64) (stat *fuse.FileStat) {
+//Se fuse session
+var Se *fuse.Session
 
-	switch nodeid {
-	case 1:
-		stat = new(fuse.FileStat)
-		stat.Nodeid = 1
-		stat.Stat.Mode = uint32(syscall.S_IFDIR) | uint32(0755)
-		stat.Stat.Nlink = 2
-	case 2:
-		stat = new(fuse.FileStat)
-		stat.Nodeid = 2
-		stat.Stat.Mode = uint32(syscall.S_IFREG) | uint32(0444)
-		stat.Stat.Nlink = 1
-		stat.Stat.Size = int64(len(helloContent))
-	default:
-	}
+var wait sync.WaitGroup
 
-	return stat
-}
+var testInit = func(conn *fuse.ConnInfo) (userdata interface{}) {
 
-var getattr = func(req fuse.Req, nodeid uint64) (fsStat *fuse.FileStat, result int32) {
+	wait.Done()
 
-	fsStat = helloStat(nodeid)
-	if fsStat == nil {
-		result = errno.ENOENT
-	} else {
-		result = errno.SUCCESS
-	}
-
-	return fsStat, result
-}
-
-var lookup = func(req fuse.Req, parentId uint64, name string) (fsStat *fuse.FileStat, result int32) {
-
-	if parentId != 1 || name != helloName {
-		result = errno.ENOENT
-	} else {
-		fsStat = helloStat(2)
-	}
-
-	return fsStat, result
+	return nil
 }
 
 var readdir = func(req fuse.Req, nodeid uint64, size uint32, offset uint64, fi fuse.FileInfo) (fileList []fuse.Dirent, result int32) {
@@ -116,13 +80,8 @@ var read = func(req fuse.Req, nodeid uint64, size uint32, offset uint64, fi fuse
 }
 
 // NewTestFuse : create a fuse session for test
-func NewTestFuse(mountpoint string) *fuse.Session {
-	opts := fuse.Opt{}
-	opts.Getattr = &getattr
-	opts.Readdir = &readdir
-	opts.Lookup = &lookup
-	opts.Open = &open
-	opts.Read = &read
+func NewTestFuse(mountpoint string, opts fuse.Opt) *fuse.Session {
+	opts.Init = &testInit
 
 	se := fuse.NewFuseSession(mountpoint, &opts, 1024)
 	se.Debug = true

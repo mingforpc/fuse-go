@@ -2,8 +2,11 @@ package test
 
 import (
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/mingforpc/fuse-go/fuse"
 
 	"github.com/mingforpc/fuse-go/fuse/mount"
 )
@@ -26,8 +29,16 @@ func readFromMtab() ([]string, error) {
 // TestMount : Test fuse mount and umount, check it in /etc/mtab
 func TestMount(t *testing.T) {
 
+	tempPoint, err := createTempPoint()
+
+	if err != nil {
+		t.Errorf("create temp point error: %+v \n", err)
+	}
+
+	se := NewTestFuse(tempPoint, fuse.Opt{})
+
 	// call mount
-	err := mount.Mount(se)
+	err = mount.Mount(se)
 
 	if err != nil {
 		t.Errorf("Mount error: %+v \n", err)
@@ -43,11 +54,17 @@ func TestMount(t *testing.T) {
 		t.Errorf("Failed to read /etc/mtab: %+v \n", err)
 	}
 
+	abspath := tempPoint
+
+	if !filepath.IsAbs(abspath) {
+		abspath, _ = filepath.Abs(abspath)
+	}
+
 	var isMount bool
 
 	for _, line := range lines {
 
-		if strings.HasPrefix(line, "/dev/fuse") && strings.Contains(line, "fuse-go/test/test_mountpoint") {
+		if strings.HasPrefix(line, "/dev/fuse") && strings.Contains(line, abspath) {
 			isMount = true
 		}
 
@@ -76,7 +93,7 @@ func TestMount(t *testing.T) {
 
 	for _, line := range lines {
 
-		if strings.HasPrefix(line, "/dev/fuse") && strings.Contains(line, "fuse-go/test/test_mountpoint") {
+		if strings.HasPrefix(line, "/dev/fuse") && strings.Contains(line, abspath) {
 			isUnMount = false
 		}
 
