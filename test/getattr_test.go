@@ -198,3 +198,43 @@ func TestLookup(t *testing.T) {
 		t.Errorf("getattr_test_dir/test mode should be %x \n", uint32(syscall.S_IFREG)|uint32(0444))
 	}
 }
+
+func TestGetattr(t *testing.T) {
+	tempPoint, err := createTempPoint()
+
+	if err != nil {
+		t.Fatalf("TestGetattr err: %+v \n", err)
+	}
+
+	opts := fuse.Opt{}
+	opts.Getattr = &getattr
+	opts.Lookup = &lookup
+
+	se := NewTestFuse(tempPoint, opts)
+
+	err = preTest(se)
+
+	if err != nil {
+		panic(err)
+	}
+
+	go se.FuseLoop()
+	defer exitTest(se)
+
+	wait.Wait()
+
+	// {root}
+	var rootStat syscall.Stat_t
+	err = syscall.Stat(tempPoint, &rootStat)
+
+	if rootStat.Ino != 1 {
+		t.Errorf("{root} inode should be %d \n", 1)
+	}
+	if rootStat.Mode != uint32(syscall.S_IFDIR)|uint32(0755) {
+		t.Errorf("{root} mode should be %x \n", uint32(syscall.S_IFDIR)|uint32(0755))
+	}
+	if rootStat.Nlink != 2 {
+		t.Errorf("{root} Nlink should be %d \n", 1)
+	}
+
+}
