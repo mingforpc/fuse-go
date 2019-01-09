@@ -71,10 +71,12 @@ func (se *Session) FuseLoop() {
 
 			if err != nil {
 				log.Error.Println(err)
+				close(se.writeChan)
 			} else {
 				// Avoid srive closed channel
 				select {
 				case <-se.closeCh:
+					close(se.writeChan)
 					return
 				case se.writeChan <- res:
 				}
@@ -157,7 +159,7 @@ func (se *Session) Close() {
 	syscall.Close(se.devFd)
 
 	close(se.closeCh)
-	close(se.writeChan)
+	// close(se.writeChan)
 
 }
 
