@@ -264,7 +264,7 @@ func NewTestFuse(mountpoint string, opts fuse.Opt) *fuse.Session {
 	opts.Init = &testInit
 
 	se := fuse.NewFuseSession(mountpoint, &opts, 1024)
-	se.Debug = true
+	se.Debug = false
 	se.FuseConfig.AttrTimeout = 1
 
 	return se

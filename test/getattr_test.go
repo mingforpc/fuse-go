@@ -36,15 +36,18 @@ func TestLookup(t *testing.T) {
 	// {root}
 	var rootStat syscall.Stat_t
 	err = syscall.Stat(tempPoint, &rootStat)
-
-	if rootStat.Ino != 1 {
+	if err != nil {
+		t.Errorf("TestLookup err: %+v \n", err)
+	}
+	stat := root.stat.Stat
+	if rootStat.Ino != stat.Ino {
 		t.Errorf("{root} inode should be %d \n", 1)
 	}
-	if rootStat.Mode != uint32(syscall.S_IFDIR)|uint32(0755) {
-		t.Errorf("{root} mode should be %x \n", uint32(syscall.S_IFDIR)|uint32(0755))
+	if rootStat.Mode != stat.Mode {
+		t.Errorf("{root} mode should be %x \n", stat.Mode)
 	}
-	if rootStat.Nlink != 2 {
-		t.Errorf("{root} Nlink should be %d \n", 1)
+	if rootStat.Nlink != stat.Nlink {
+		t.Errorf("{root} Nlink should be %d \n", stat.Nlink)
 	}
 
 	// {root}/test
@@ -53,7 +56,7 @@ func TestLookup(t *testing.T) {
 	if err != nil {
 		t.Errorf("TestLookup err: %+v \n", err)
 	}
-	stat := rootFile.stat.Stat
+	stat = rootFile.stat.Stat
 	if rootFileStat.Ino != stat.Ino {
 		t.Errorf("getattr_test inode should be %d \n", stat.Ino)
 	}
