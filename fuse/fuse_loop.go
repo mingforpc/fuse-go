@@ -63,7 +63,6 @@ func (se *Session) FuseLoop() {
 			}()
 
 			res, err := distribute(&req, inheader, buf)
-
 			if err == kernel.ErrNoNeedReply {
 				// This request no need to reply
 				return
@@ -101,8 +100,7 @@ func (se *Session) readGoro() {
 		breq, err := se.readCmd()
 		if err != nil {
 
-			if err == syscall.ENODEV {
-
+			if err == syscall.ENODEV || err == syscall.EBADF {
 				se.Running = false
 			} else {
 				// 读出错退出
@@ -688,6 +686,7 @@ func distribute(req *Req, inHeader kernel.FuseInHeader, bcontent []byte) ([]byte
 		// interrupt event
 
 		doInterrupt(*req)
+		req.session.Close()
 
 	default:
 		panic(errors.New("未实现的操作！！！"))
