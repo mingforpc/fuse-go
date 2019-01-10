@@ -3,6 +3,7 @@ package test
 import (
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 	"syscall"
 
@@ -34,12 +35,15 @@ var rootDir testFileStat
 // '/dir/test' stat
 var dirFile testFileStat
 
+// the dir for create
+var newDir testFileStat
+
 func init() {
 	// root
 	stat := fuse.FileStat{}
 	stat.Nodeid = 1
 	stat.Stat.Ino = 1
-	stat.Stat.Mode = uint32(syscall.S_IFDIR) | uint32(0755)
+	stat.Stat.Mode = uint32(syscall.S_IFDIR) | uint32(0777)
 	stat.Stat.Nlink = 2
 	// root = testFileStat{}
 	root.stat = stat
@@ -86,6 +90,16 @@ func init() {
 	dirFile.path = "test_dir/test"
 	dirFile.content = "hello world!\n"
 	dirFile.stat = stat
+
+	// newDir
+	stat = fuse.FileStat{}
+	stat.Nodeid = 5
+	stat.Stat.Ino = 5
+	stat.Stat.Mode = uint32(syscall.S_IFDIR) | uint32(0755)
+	stat.Stat.Nlink = 0
+	stat.Stat.Uid = uint32(os.Getuid())
+	stat.Stat.Gid = uint32(os.Getgid())
+	newDir.stat = stat
 }
 
 func getStat(nodeid uint64) (stat *fuse.FileStat) {
@@ -200,13 +214,7 @@ var readdir = func(req fuse.Req, nodeid uint64, size uint32, offset uint64, fi f
 
 var open = func(req fuse.Req, nodeid uint64, fi *fuse.FileInfo) (result int32) {
 
-	if nodeid != 2 {
-		result = errno.EISDIR
-	} else if (fi.Flags & 3) != syscall.O_RDONLY {
-		result = errno.EACCES
-	} else {
-		result = errno.SUCCESS
-	}
+	fmt.Printf("Open: nodeid:%d,  fi:[%+v] \n", nodeid, fi)
 
 	return result
 }
@@ -219,18 +227,36 @@ var read = func(req fuse.Req, nodeid uint64, size uint32, offset uint64, fi fuse
 
 	result = errno.SUCCESS
 
-	// if uint32(len(testContent)) < size {
-
-	// 	contentBuf := []byte(testContent)
-
-	// 	content = contentBuf[offset:len(testContent)]
-
-	// } else {
-	// 	contentBuf := []byte(testContent)
-	// 	content = contentBuf[offset:size]
-	// }
-
 	return content, result
+}
+
+var fsyncdir = func(req fuse.Req, nodeid uint64, datasync uint32, fi fuse.FileInfo) (result int32) {
+
+	fmt.Printf("Open: nodeid:[%d], datasync:[%d], fi:[%+b] \n", nodeid, datasync, fi)
+
+	return result
+}
+
+var mkdir = func(req fuse.Req, parentid uint64, name string, mode uint32) (fsStat *fuse.FileStat, result int32) {
+
+	fmt.Printf("Mkdir: parentid:[%d], name:[%s], mode:[%d] \n", parentid, name, mode)
+
+	fsStat = &newDir.stat
+	newDir.name = name
+
+	result = errno.SUCCESS
+
+	return fsStat, result
+}
+
+var rmdir = func(req fuse.Req, parentid uint64, name string) (res int32) {
+	fmt.Printf("Rmdir: parentid:[%d], name:[%s] \n", parentid, name)
+
+	if parentid == root.stat.Nodeid && name == rootDir.name {
+		return errno.ENOTEMPTY
+	}
+
+	return errno.SUCCESS
 }
 
 // NewTestFuse : create a fuse session for test
@@ -238,7 +264,7 @@ func NewTestFuse(mountpoint string, opts fuse.Opt) *fuse.Session {
 	opts.Init = &testInit
 
 	se := fuse.NewFuseSession(mountpoint, &opts, 1024)
-	se.Debug = false
+	se.Debug = true
 	se.FuseConfig.AttrTimeout = 1
 
 	return se
