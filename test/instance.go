@@ -21,6 +21,9 @@ type testFileStat struct {
 	content string
 	path    string
 	stat    fuse.FileStat
+
+	// only for symlink
+	link string
 }
 
 // root stat
@@ -42,6 +45,9 @@ var newDir testFileStat
 // key: inode id
 // value: map[{xattr name}]{xattr value}
 var xattrMap map[uint64]map[string]string
+
+// the symlink File
+var symlinkFile testFileStat
 
 func init() {
 	// root
@@ -342,6 +348,35 @@ var removexattr = func(req fuse.Req, nodeid uint64, name string) (result int32) 
 
 	result = errno.SUCCESS
 	return result
+}
+
+var symlink = func(req fuse.Req, parentid uint64, link string, name string) (fsStat *fuse.FileStat, result int32) {
+
+	fmt.Printf("Symlink: parentid[%d], link[%s], name[%s] \n", parentid, link, name)
+
+	symlinkFile.name = name
+	symlinkFile.link = link
+	symlinkFile.stat.Nodeid = 6
+	symlinkFile.stat.Stat.Ino = 6
+	symlinkFile.stat.Stat.Mode = uint32(syscall.S_IFLNK) | uint32(0444)
+
+	result = errno.SUCCESS
+
+	return &symlinkFile.stat, result
+}
+
+var readlink = func(req fuse.Req, nodeid uint64) (path string, result int32) {
+
+	fmt.Printf("Readlink: nodeid[%d] \n", nodeid)
+
+	if symlinkFile.stat.Nodeid != nodeid {
+		return "", errno.EINVAL
+	}
+
+	path = symlinkFile.link
+	result = errno.SUCCESS
+
+	return path, result
 }
 
 // NewTestFuse : create a fuse session for test
