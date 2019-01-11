@@ -38,6 +38,11 @@ var dirFile testFileStat
 // the dir for create
 var newDir testFileStat
 
+// the map to save xattr
+// key: inode id
+// value: map[{xattr name}]{xattr value}
+var xattrMap map[uint64]map[string]string
+
 func init() {
 	// root
 	stat := fuse.FileStat{}
@@ -100,6 +105,9 @@ func init() {
 	stat.Stat.Uid = uint32(os.Getuid())
 	stat.Stat.Gid = uint32(os.Getgid())
 	newDir.stat = stat
+
+	// init xattrmap
+	xattrMap = make(map[uint64]map[string]string)
 }
 
 func getStat(nodeid uint64) (stat *fuse.FileStat) {
@@ -257,6 +265,83 @@ var rmdir = func(req fuse.Req, parentid uint64, name string) (res int32) {
 	}
 
 	return errno.SUCCESS
+}
+
+var setxattr = func(req fuse.Req, nodeid uint64, name string, value string, flags uint32) (result int32) {
+
+	fmt.Printf("Setxattr: nodeid:[%d], name:[%s], value:[%s] \n", nodeid, name, value)
+
+	kvMap := xattrMap[nodeid]
+
+	if kvMap == nil {
+		xattrMap[nodeid] = make(map[string]string)
+		kvMap = xattrMap[nodeid]
+	}
+
+	kvMap[name] = value
+
+	result = errno.SUCCESS
+
+	return result
+}
+
+var getxattr = func(req fuse.Req, nodeid uint64, name string, size uint32) (value string, result int32) {
+
+	fmt.Printf("Getxattr: nodeid:[%d], name:[%s] \n", nodeid, name)
+
+	kvMap := xattrMap[nodeid]
+
+	if kvMap == nil {
+		return "", errno.ENOATTR
+	}
+
+	value = kvMap[name]
+
+	if value == "" {
+		result = errno.ENOATTR
+	} else {
+		result = errno.SUCCESS
+	}
+
+	return value, result
+}
+
+var listxattr = func(req fuse.Req, nodeid uint64, size uint32) (listVal string, result int32) {
+	fmt.Printf("Listxattr: nodeid:[%d] \n", nodeid)
+	kvMap := xattrMap[nodeid]
+
+	if kvMap == nil {
+		return "", errno.ENOATTR
+	}
+
+	for k := range kvMap {
+		listVal += k + string(byte(0))
+	}
+	// remove lastest '\0'
+	listVal = listVal[:len(listVal)-1]
+
+	result = errno.SUCCESS
+
+	return listVal, result
+}
+
+var removexattr = func(req fuse.Req, nodeid uint64, name string) (result int32) {
+	fmt.Printf("Removexattr: nodeid:[%d], name[%s] \n", nodeid, name)
+
+	kvMap := xattrMap[nodeid]
+
+	if kvMap == nil {
+		return errno.ENOATTR
+	}
+
+	if kvMap[name] == "" {
+		return errno.ENOATTR
+	}
+
+	delete(kvMap, name)
+
+	result = errno.SUCCESS
+	return result
 }
 
 // NewTestFuse : create a fuse session for test
