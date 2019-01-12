@@ -1,7 +1,6 @@
 package test
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -54,6 +53,9 @@ var symlinkFile testFileStat
 
 // the hard link file
 var hardlinkFile testFileStat
+
+// the statfs of root
+var rootStatfs fuse.Statfs
 
 func init() {
 	// root
@@ -119,6 +121,16 @@ func init() {
 
 	// init xattrmap
 	xattrMap = make(map[uint64]map[string]string)
+
+	// rootStatfs
+	rootStatfs.Bsize = 1024
+	rootStatfs.Blocks = 2048
+	rootStatfs.Bfree = 2048
+	rootStatfs.Bavail = 256
+	rootStatfs.Files = 8
+	rootStatfs.Ffree = 1024
+	rootStatfs.NameLen = 256
+	rootStatfs.Frsize = 256
 }
 
 func getStat(nodeid uint64) (stat *fuse.FileStat) {
@@ -246,18 +258,76 @@ var open = func(req fuse.Req, nodeid uint64, fi *fuse.FileInfo) (result int32) {
 
 	fmt.Printf("Open: nodeid:%d,  fi:[%+v] \n", nodeid, fi)
 
+	if nodeid != rootFile.stat.Nodeid {
+		result = errno.EACCES
+	} else {
+		result = errno.SUCCESS
+	}
+
 	return result
 }
 
 var read = func(req fuse.Req, nodeid uint64, size uint32, offset uint64, fi fuse.FileInfo) (content []byte, result int32) {
+	fmt.Printf("Read: nodeid:%d, size[%d], offset[%d], fi[%+v] \n", nodeid, size, offset, fi)
 
-	if nodeid != 2 {
-		panic(errors.New("read error file"))
+	if nodeid != rootFile.stat.Nodeid {
+		result = errno.EACCES
+	} else {
+		content = []byte(rootFile.content)
+		result = errno.SUCCESS
 	}
 
-	result = errno.SUCCESS
-
 	return content, result
+}
+
+var write = func(req fuse.Req, nodeid uint64, buf []byte, offset uint64, fi fuse.FileInfo) (size uint32, result int32) {
+	fmt.Printf("Write: nodeid:%d, len of buf[%d], offset[%d], fi[%+v] \n", nodeid, len(buf), offset, fi)
+
+	if nodeid != rootFile.stat.Nodeid {
+		result = errno.EACCES
+	} else {
+
+		data := string(buf)
+		dataLen := uint64(len(data))
+		contentLen := uint64(len(rootFile.content))
+		if offset >= contentLen {
+			rootFile.content += data
+		} else {
+
+			if offset+dataLen < contentLen {
+				rootFile.content = rootFile.content[:offset] + data + rootFile.content[offset+dataLen:]
+			} else {
+				rootFile.content = rootFile.content[:offset] + data
+			}
+		}
+
+		size = uint32(dataLen)
+		result = errno.SUCCESS
+	}
+
+	return size, result
+}
+
+var fsync = func(req fuse.Req, nodeid uint64, datasync uint32, fi fuse.FileInfo) (result int32) {
+
+	fmt.Printf("Fsync: nodeid:%d, datasync[%d],fi[%+v] \n", nodeid, datasync, fi)
+
+	if nodeid != rootFile.stat.Nodeid {
+		result = errno.EACCES
+	} else {
+		result = errno.SUCCESS
+	}
+
+	return result
+}
+
+var flush = func(req fuse.Req, nodeid uint64, fi fuse.FileInfo) (result int32) {
+	fmt.Printf("Flush: nodeid:%d,  fi[%+v] \n", nodeid, fi)
+	return errno.SUCCESS
+}
+var release = func(req fuse.Req, nodeid uint64, fi fuse.FileInfo) (result int32) {
+	fmt.Printf("Release: nodeid:[%d],  fi:[%+b] \n", nodeid, fi)
+	return result
 }
 
 var fsyncdir = func(req fuse.Req, nodeid uint64, datasync uint32, fi fuse.FileInfo) (result int32) {
@@ -471,12 +541,24 @@ var link = func(req fuse.Req, oldnodeid uint64, newparentid uint64, newname stri
 	return fsStat, result
 }
 
+var statfs = func(req fuse.Req, nodeid uint64) (statfs *fuse.Statfs, result int32) {
+
+	if nodeid == root.stat.Nodeid {
+		statfs = &rootStatfs
+		result = errno.SUCCESS
+	} else {
+		result = errno.EACCES
+	}
+
+	return statfs, result
+}
+
 // NewTestFuse : create a fuse session for test
 func NewTestFuse(mountpoint string, opts fuse.Opt) *fuse.Session {
 	opts.Init = &testInit
 
 	se := fuse.NewFuseSession(mountpoint, &opts, 1024)
-	se.Debug = false
+	se.Debug = true
 	se.FuseConfig.AttrTimeout = 1
 
 	return se
