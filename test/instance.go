@@ -41,6 +41,9 @@ var dirFile testFileStat
 // the dir for create
 var newDir testFileStat
 
+// the file for create
+var newFile testFileStat
+
 // the map to save xattr
 // key: inode id
 // value: map[{xattr name}]{xattr value}
@@ -49,6 +52,9 @@ var xattrMap map[uint64]map[string]string
 // the symlink File
 var symlinkFile testFileStat
 
+// the hard link file
+var hardlinkFile testFileStat
+
 func init() {
 	// root
 	stat := fuse.FileStat{}
@@ -56,14 +62,13 @@ func init() {
 	stat.Stat.Ino = 1
 	stat.Stat.Mode = uint32(syscall.S_IFDIR) | uint32(0777)
 	stat.Stat.Nlink = 2
-	// root = testFileStat{}
 	root.stat = stat
 
 	// rootFile
 	stat = fuse.FileStat{}
 	stat.Nodeid = 2
 	stat.Stat.Ino = 2
-	stat.Stat.Mode = uint32(syscall.S_IFREG) | uint32(0444)
+	stat.Stat.Mode = uint32(syscall.S_IFREG) | uint32(0777)
 	stat.Stat.Nlink = 1
 	stat.Stat.Size = int64(len("hello world!\n"))
 	stat.Stat.Ctim = syscall.Timespec{1547044000, 100}
@@ -133,6 +138,15 @@ func getStat(nodeid uint64) (stat *fuse.FileStat) {
 	case 4:
 		// test_dir/test file
 		stat = &dirFile.stat
+	case 5:
+		// newDir
+		stat = &newDir.stat
+	case 6:
+		stat = &symlinkFile.stat
+	case 7:
+		stat = &newFile.stat
+	case 8:
+		stat = &hardlinkFile.stat
 
 	default:
 	}
@@ -175,6 +189,8 @@ var lookup = func(req fuse.Req, parentId uint64, name string) (fsStat *fuse.File
 			fsStat = &rootFile.stat
 		} else if name == rootDir.name {
 			fsStat = &rootDir.stat
+		} else if name == newFile.name {
+			fsStat = &newFile.stat
 		} else {
 			result = errno.ENOENT
 		}
@@ -377,6 +393,82 @@ var readlink = func(req fuse.Req, nodeid uint64) (path string, result int32) {
 	result = errno.SUCCESS
 
 	return path, result
+}
+
+var mknod = func(req fuse.Req, parentid uint64, name string, mode uint32, rdev uint32) (fsStat *fuse.FileStat, result int32) {
+
+	fmt.Printf("Mknod: parentid:%d, name:%s, mode:%x, rdev:%d \n", parentid, name, mode, rdev)
+
+	newFile.name = name
+	newFile.stat.Nodeid = 7
+	fsStat = &newFile.stat
+
+	fsStat.Nodeid = 7
+	fsStat.Stat.Ino = 7
+	fsStat.Stat.Mode = mode
+	fsStat.Stat.Rdev = uint64(rdev)
+
+	return fsStat, result
+}
+
+var unlink = func(req fuse.Req, parentid uint64, name string) (result int32) {
+	fmt.Printf("Unlink: parentid:%d, name:%s \n", parentid, name)
+
+	result = errno.SUCCESS
+	if parentid == root.stat.Nodeid {
+
+		if name == newFile.name {
+			newFile.name = ""
+			newFile.stat = fuse.FileStat{}
+		} else {
+			result = errno.EACCES
+		}
+
+	} else if parentid == rootDir.stat.Nodeid {
+
+		result = errno.EACCES
+	} else {
+		result = errno.ENOENT
+	}
+
+	return result
+}
+
+var rename = func(req fuse.Req, parentid uint64, name string, newparentid uint64, newname string) (result int32) {
+	fmt.Printf("Rename: parentid[%d], name[%s], newparentid[%d], newname[%s] \n", parentid, name, newparentid, newname)
+
+	if parentid == root.stat.Nodeid && name == newFile.name {
+
+		if newparentid == root.stat.Nodeid {
+
+			newFile.name = newname
+
+		} else {
+			result = errno.EACCES
+		}
+
+	} else {
+		result = errno.EACCES
+	}
+
+	return result
+}
+
+var link = func(req fuse.Req, oldnodeid uint64, newparentid uint64, newname string) (fsStat *fuse.FileStat, result int32) {
+
+	fmt.Printf("Link: oldnodeid[%d], newparentid[%d], newname[%s] \n", oldnodeid, newparentid, newname)
+
+	if oldnodeid != rootFile.stat.Nodeid && newparentid != root.stat.Nodeid {
+		result = errno.EACCES
+	} else {
+
+		hardlinkFile.name = newname
+		hardlinkFile.stat = rootFile.stat
+		fsStat = &hardlinkFile.stat
+		result = errno.SUCCESS
+	}
+
+	return fsStat, result
 }
 
 // NewTestFuse : create a fuse session for test
