@@ -2,6 +2,7 @@ package test
 
 import (
 	"os"
+	"path/filepath"
 	"syscall"
 	"testing"
 
@@ -30,6 +31,8 @@ func TestMknod(t *testing.T) {
 
 	go se.FuseLoop()
 	defer exitTest(se)
+
+	wait.Wait()
 
 	// mknod
 	newFile := tempPoint + "/" + "new_test"
@@ -71,6 +74,8 @@ func TestUnlink(t *testing.T) {
 
 	go se.FuseLoop()
 	defer exitTest(se)
+
+	wait.Wait()
 
 	// mknod
 	newFile := tempPoint + "/" + "new_test"
@@ -124,6 +129,8 @@ func TestRename(t *testing.T) {
 
 	go se.FuseLoop()
 	defer exitTest(se)
+
+	wait.Wait()
 
 	// mknod
 	newFile := tempPoint + "/" + "new_test"
@@ -180,6 +187,8 @@ func TestLink(t *testing.T) {
 	go se.FuseLoop()
 	defer exitTest(se)
 
+	wait.Wait()
+
 	// link
 	err = os.Link(tempPoint+"/"+rootFile.path, tempPoint+"/"+"hardlink")
 	if err != nil {
@@ -199,7 +208,7 @@ func TestOpenReadWrite(t *testing.T) {
 	tempPoint, err := createTempPoint()
 
 	if err != nil {
-		t.Fatalf("TestLink err: %+v \n", err)
+		t.Fatalf("TestOpenReadWrite err: %+v \n", err)
 	}
 
 	opts := fuse.Opt{}
@@ -217,11 +226,13 @@ func TestOpenReadWrite(t *testing.T) {
 	err = preTest(se)
 
 	if err != nil {
-		t.Fatalf("TestLink err: %+v \n", err)
+		t.Fatalf("TestOpenReadWrite err: %+v \n", err)
 	}
 
 	go se.FuseLoop()
 	defer exitTest(se)
+
+	wait.Wait()
 
 	//open
 	path := tempPoint + "/" + rootFile.path
@@ -270,7 +281,7 @@ func TestStatfs(t *testing.T) {
 	tempPoint, err := createTempPoint()
 
 	if err != nil {
-		t.Fatalf("TestLink err: %+v \n", err)
+		t.Fatalf("TestStatfs err: %+v \n", err)
 	}
 
 	opts := fuse.Opt{}
@@ -283,11 +294,13 @@ func TestStatfs(t *testing.T) {
 	err = preTest(se)
 
 	if err != nil {
-		t.Fatalf("TestLink err: %+v \n", err)
+		t.Fatalf("TestStatfs err: %+v \n", err)
 	}
 
 	go se.FuseLoop()
 	defer exitTest(se)
+
+	wait.Wait()
 
 	// statfs
 	buf := syscall.Statfs_t{}
@@ -326,4 +339,136 @@ func compareStatfs(statfs syscall.Statfs_t) bool {
 	}
 
 	return true
+}
+
+const (
+	R_OK = 0x4
+	W_OK = 0x2
+	X_OK = 0x1
+)
+
+func TestAccess(t *testing.T) {
+	tempPoint, err := createTempPoint()
+
+	if err != nil {
+		t.Fatalf("TestAccess err: %+v \n", err)
+	}
+
+	opts := fuse.Opt{}
+	opts.Getattr = &getattr
+	opts.Lookup = &lookup
+	opts.Access = &access
+
+	se := NewTestFuse(tempPoint, opts)
+
+	err = preTest(se)
+
+	if err != nil {
+		t.Fatalf("TestAccess err: %+v \n", err)
+	}
+
+	go se.FuseLoop()
+	defer exitTest(se)
+	wait.Wait()
+
+	// lookup
+	os.Stat(tempPoint + "/" + rootFile.path)
+
+	// access
+	err = syscall.Access(tempPoint+"/"+rootFile.path, R_OK)
+
+	if err != nil {
+		t.Fatal("Failed to access file")
+	}
+
+	err = os.Chdir(tempPoint + "/" + rootDir.path)
+
+	if err != nil {
+		t.Fatal("Failed to access file")
+	}
+
+}
+
+func TestCreate(t *testing.T) {
+	tempPoint, err := createTempPoint()
+
+	if err != nil {
+		t.Fatalf("TestCreate err: %+v \n", err)
+	}
+
+	opts := fuse.Opt{}
+	opts.Getattr = &getattr
+	opts.Lookup = &lookup
+	opts.Release = &release
+	opts.Create = &create
+
+	se := NewTestFuse(tempPoint, opts)
+
+	err = preTest(se)
+
+	if err != nil {
+		t.Fatalf("TestCreate err: %+v \n", err)
+	}
+
+	go se.FuseLoop()
+	defer exitTest(se)
+
+	wait.Wait()
+
+	// create
+	f, err := os.OpenFile(tempPoint+"/"+"new_file", os.O_CREATE, os.ModePerm)
+	if err != nil {
+		t.Fatalf("Failed to call create: %+v \n", err)
+	}
+
+	if filepath.Base(f.Name()) != newFile.name {
+		t.Fatal("new file not correct ")
+	}
+
+}
+
+func TestLk(t *testing.T) {
+	tempPoint, err := createTempPoint()
+
+	if err != nil {
+		t.Fatalf("TestLk err: %+v \n", err)
+	}
+
+	opts := fuse.Opt{}
+	opts.Getattr = &getattr
+	opts.Lookup = &lookup
+	opts.Open = &open
+	opts.Getlk = &getlk
+	opts.Setlk = &setlk
+
+	se := NewTestFuse(tempPoint, opts)
+
+	err = preTest(se)
+
+	if err != nil {
+		t.Fatalf("TestLk err: %+v \n", err)
+	}
+
+	go se.FuseLoop()
+	defer exitTest(se)
+
+	wait.Wait()
+
+	//open
+	path := tempPoint + "/" + rootFile.path
+	file, err := os.OpenFile(path, os.O_RDWR, 0)
+	if err != nil {
+		t.Fatalf("Failed to open file: %+v \n", err)
+	}
+
+	// getlk
+	lock := syscall.Flock_t{}
+	err = syscall.FcntlFlock(file.Fd(), syscall.F_SETLK, &lock)
+	if err != nil {
+		t.Fatalf("Failed to set file lock: %+v \n", err)
+	}
+	err = syscall.FcntlFlock(file.Fd(), syscall.F_GETLK, &lock)
+	if err != nil {
+		t.Fatalf("Failed to get file lock: %+v \n", err)
+	}
 }

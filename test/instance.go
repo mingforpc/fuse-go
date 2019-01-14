@@ -543,6 +543,8 @@ var link = func(req fuse.Req, oldnodeid uint64, newparentid uint64, newname stri
 
 var statfs = func(req fuse.Req, nodeid uint64) (statfs *fuse.Statfs, result int32) {
 
+	fmt.Printf("Statfs: nodeid[%d] \n", nodeid)
+
 	if nodeid == root.stat.Nodeid {
 		statfs = &rootStatfs
 		result = errno.SUCCESS
@@ -553,9 +555,60 @@ var statfs = func(req fuse.Req, nodeid uint64) (statfs *fuse.Statfs, result int3
 	return statfs, result
 }
 
+var access = func(req fuse.Req, nodeid uint64, mask uint32) (result int32) {
+	fmt.Printf("Access: nodeid[%d], mask[%d] \n", nodeid, mask)
+
+	if nodeid != rootFile.stat.Nodeid {
+		result = errno.SUCCESS
+	} else {
+		result = errno.EACCES
+	}
+
+	return result
+}
+
+var create = func(req fuse.Req, parentid uint64, name string, mode uint32, fi *fuse.FileInfo) (fsStat *fuse.FileStat, result int32) {
+	fmt.Printf("Create: parentid:%d, name:%s, mode:%x, fi:%+v \n", parentid, name, mode, fi)
+
+	newFile.name = name
+	newFile.stat.Nodeid = 7
+	fsStat = &newFile.stat
+
+	fsStat.Nodeid = 7
+	fsStat.Stat.Ino = 7
+	fsStat.Stat.Mode = mode
+
+	return fsStat, result
+}
+
+var getlk = func(req fuse.Req, nodeid uint64, fi fuse.FileInfo, lock *fuse.Flock) (result int32) {
+
+	fmt.Printf("Getlk: nodeid:%d, fi:%+v, lock:%+v \n", nodeid, fi, lock)
+
+	if nodeid != rootFile.stat.Nodeid {
+		return errno.EACCES
+	}
+
+	return errno.SUCCESS
+}
+
+var setlk = func(req fuse.Req, nodeid uint64, fi fuse.FileInfo, lock fuse.Flock, lksleep int) (result int32) {
+
+	fmt.Printf("Setlk: nodeid:%d, fi:%+v, lock:%+v, lksleep:%d \n", nodeid, fi, lock, lksleep)
+
+	if nodeid != rootFile.stat.Nodeid {
+		return errno.EACCES
+	}
+
+	return errno.SUCCESS
+
+}
+
 // NewTestFuse : create a fuse session for test
 func NewTestFuse(mountpoint string, opts fuse.Opt) *fuse.Session {
-	opts.Init = &testInit
+	if opts.Init == nil {
+		opts.Init = &testInit
+	}
 
 	se := fuse.NewFuseSession(mountpoint, &opts, 1024)
 	se.Debug = true
