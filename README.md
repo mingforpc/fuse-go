@@ -1,6 +1,7 @@
 # fuse-go
 
 [![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+[![Coverage](https://img.shields.io/badge/coverage-75%25-yellowgreen.svg)]()
 
 一个纯Golang的[libfuse](https://github.com/libfuse/libfuse)实现，目前相当于实现了libfuse中的low level接口。
 
@@ -96,7 +97,7 @@ Mount部分的代码，为了实现普通用户可以直接Mount，调用了`/bi
 * ~~修改好注释和调整结构~~(2018/12/24)
 * ~~完成`example`中的例子~~(2018/12/29)
 * ~~发现`Close()`会存在block的情况，需要解决(急)~~(2019/1/3)
-* 往`test`中添加测试用例
+* ~~往`test`中添加测试用例~~(2018/1/14, 大部分函数已经有测试)
 * 测试各个系统上的兼容性(目前只在64位Ubuntu上进行)
 * 完善`evloop`相关的操作
 * 提供一些管理`inode`和`path`的工具类

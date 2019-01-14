@@ -38,7 +38,7 @@ func TestMount(t *testing.T) {
 	se := NewTestFuse(tempPoint, fuse.Opt{})
 
 	// call mount
-	err = mount.Mount(se)
+	err = mount.Mount(se, nil)
 
 	if err != nil {
 		t.Errorf("Mount error: %+v \n", err)

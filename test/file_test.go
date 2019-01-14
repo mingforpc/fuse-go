@@ -6,6 +6,8 @@ import (
 	"syscall"
 	"testing"
 
+	"golang.org/x/sys/unix"
+
 	"github.com/mingforpc/fuse-go/fuse"
 )
 
@@ -381,12 +383,6 @@ func TestAccess(t *testing.T) {
 		t.Fatal("Failed to access file")
 	}
 
-	err = os.Chdir(tempPoint + "/" + rootDir.path)
-
-	if err != nil {
-		t.Fatal("Failed to access file")
-	}
-
 }
 
 func TestCreate(t *testing.T) {
@@ -470,5 +466,89 @@ func TestLk(t *testing.T) {
 	err = syscall.FcntlFlock(file.Fd(), syscall.F_GETLK, &lock)
 	if err != nil {
 		t.Fatalf("Failed to get file lock: %+v \n", err)
+	}
+}
+
+// TODO: how to test？
+func TestBmap(t *testing.T) {
+}
+
+func TestIoctl(t *testing.T) {
+	tempPoint, err := createTempPoint()
+
+	if err != nil {
+		t.Fatalf("TestIoctl err: %+v \n", err)
+	}
+
+	opts := fuse.Opt{}
+	opts.Getattr = &getattr
+	opts.Lookup = &lookup
+	opts.Open = &open
+	opts.Ioctl = &ioctl
+
+	se := NewTestFuse(tempPoint, opts)
+
+	err = preTest(se)
+
+	if err != nil {
+		t.Fatalf("TestIoctl err: %+v \n", err)
+	}
+
+	go se.FuseLoop()
+	defer exitTest(se)
+
+	wait.Wait()
+
+	//open
+	path := tempPoint + "/" + rootFile.path
+	file, err := os.OpenFile(path, os.O_RDWR, 0)
+	if err != nil {
+		t.Fatalf("Failed to open file: %+v \n", err)
+	}
+
+	// ioctl
+	_, err = unix.IoctlGetInt(int(file.Fd()), unix.SYS_IOCTL)
+	if err != nil {
+		t.Fatalf("Failed to ioctl file: %+v \n", err)
+	}
+}
+
+func TestFallocate(t *testing.T) {
+	tempPoint, err := createTempPoint()
+
+	if err != nil {
+		t.Fatalf("TestFallocate err: %+v \n", err)
+	}
+
+	opts := fuse.Opt{}
+	opts.Getattr = &getattr
+	opts.Lookup = &lookup
+	opts.Open = &open
+	opts.Fallocate = &fallocate
+
+	se := NewTestFuse(tempPoint, opts)
+
+	err = preTest(se)
+
+	if err != nil {
+		t.Fatalf("TestFallocate err: %+v \n", err)
+	}
+
+	go se.FuseLoop()
+	defer exitTest(se)
+
+	wait.Wait()
+
+	//open
+	path := tempPoint + "/" + rootFile.path
+	file, err := os.OpenFile(path, os.O_RDWR, 0)
+	if err != nil {
+		t.Fatalf("Failed to open file: %+v \n", err)
+	}
+
+	// fallocate
+	err = unix.Fallocate(int(file.Fd()), 0, 0, 1)
+	if err != nil {
+		t.Fatalf("fallocate file: %+v \n", err)
 	}
 }

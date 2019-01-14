@@ -604,6 +604,32 @@ var setlk = func(req fuse.Req, nodeid uint64, fi fuse.FileInfo, lock fuse.Flock,
 
 }
 
+var bmap = func(req fuse.Req, nodeid uint64, blocksize uint32, idx *uint64) (result int32) {
+
+	fmt.Printf("Bmap: nodeid:%d, blocksize:%d, idx:%d \n", nodeid, blocksize, idx)
+	return errno.SUCCESS
+}
+
+var ioctl = func(req fuse.Req, nodeid uint64, cmd uint32, arg uint64, fi fuse.FileInfo, inbuf []byte, outbufsz uint32) (ioctl *fuse.Ioctl, result int32) {
+
+	fmt.Printf("Ioctl: nodeid:%d, cmd:%d, arg:%d, fi:%+v \n", nodeid, cmd, arg, fi)
+	if nodeid != rootFile.stat.Nodeid {
+		return nil, errno.EBADF
+	}
+
+	ioctl = new(fuse.Ioctl)
+	return ioctl, errno.SUCCESS
+
+}
+
+var fallocate = func(req fuse.Req, nodeid uint64, mode uint32, offset uint64, length uint64, fi fuse.FileInfo) (result int32) {
+	fmt.Printf("Fallocate: nodeid:%d, mode:%d, offset:%d, length:%d, fi:%+v \n", nodeid, mode, offset, length, fi)
+	if nodeid != rootFile.stat.Nodeid {
+		return errno.EBADF
+	}
+	return errno.SUCCESS
+}
+
 // NewTestFuse : create a fuse session for test
 func NewTestFuse(mountpoint string, opts fuse.Opt) *fuse.Session {
 	if opts.Init == nil {
@@ -611,7 +637,7 @@ func NewTestFuse(mountpoint string, opts fuse.Opt) *fuse.Session {
 	}
 
 	se := fuse.NewFuseSession(mountpoint, &opts, 1024)
-	se.Debug = true
+	se.Debug = false
 	se.FuseConfig.AttrTimeout = 1
 
 	return se
