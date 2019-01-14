@@ -70,13 +70,14 @@ func (se *Session) FuseLoop() {
 
 			if err != nil {
 				log.Error.Println(err)
-				close(se.writeChan)
+
 			} else {
-				// Avoid srive closed channel
+				// Avoid closed channel
 				select {
 				case <-se.closeCh:
 					close(se.writeChan)
 					return
+				// TODO: 依然会存在触发关闭closed channel状态
 				case se.writeChan <- res:
 				}
 

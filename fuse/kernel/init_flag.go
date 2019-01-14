@@ -22,8 +22,8 @@ package kernel
  * FuseWritebackCache: use writeback cache for buffered writes
  * FuseNoOpenSupport: kernel supports zero-message opens
  * FuseParallelDirops: allow parallel lookups and readdir
+ * FuseCapPosixACL: filesystem supports posix acls
  * FuseHandleKillPriv: fs handles killing suid/sgid/cap on write/chown/trunc
- * FusePosixACL: filesystem supports posix acls
  */
 const (
 	FuseAsyncRead       = (1 << 0)
@@ -45,6 +45,6 @@ const (
 	FuseWritebackCache  = (1 << 16)
 	FuseNoOpenSupport   = (1 << 17)
 	FuseParallelDirops  = (1 << 18)
-	FuseHandleKillPriv  = (1 << 19)
-	FusePosixACL        = (1 << 20)
+	FuseCapPosixACL     = (1 << 19)
+	FuseHandleKillPriv  = (1 << 20)
 )

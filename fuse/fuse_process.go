@@ -103,8 +103,8 @@ func doInit(req Req, initOut *kernel.FuseInitOut) int32 {
 	if initIn.Flags&kernel.FuseHandleKillPriv > 0 {
 		se.connInfo.Capable |= kernel.FuseHandleKillPriv
 	}
-	if initIn.Flags&kernel.FusePosixACL > 0 {
-		se.connInfo.Capable |= kernel.FusePosixACL
+	if initIn.Flags&kernel.FuseCapPosixACL > 0 {
+		se.connInfo.Capable |= kernel.FuseCapPosixACL
 	}
 
 	// Default settings for modern filesystems.
@@ -136,6 +136,12 @@ func doInit(req Req, initOut *kernel.FuseInitOut) int32 {
 	if se.Opts.Readdirplus != nil {
 		se.connInfo.Want |= FuseCapReaddirplus
 		se.connInfo.Want |= FuseCapReaddirplusAuto
+	}
+
+	if se.Opts != nil && se.Opts.Init != nil {
+		userdata := (*se.Opts.Init)(se.connInfo)
+		se.userdata = userdata
+
 	}
 
 	// To set what we want fuse kenel to do
@@ -199,14 +205,9 @@ func doInit(req Req, initOut *kernel.FuseInitOut) int32 {
 	if se.connInfo.Want&kernel.FuseHandleKillPriv > 0 {
 		initOut.Flags |= kernel.FuseHandleKillPriv
 	}
-	if se.connInfo.Want&kernel.FusePosixACL > 0 {
-		initOut.Flags |= kernel.FusePosixACL
-	}
+	if se.connInfo.Want&kernel.FuseCapPosixACL > 0 {
 
-	if se.Opts != nil && se.Opts.Init != nil {
-		userdata := (*se.Opts.Init)(se.connInfo)
-		se.userdata = userdata
-
+		initOut.Flags |= kernel.FuseCapPosixACL
 	}
 
 	return errno.SUCCESS
@@ -1022,7 +1023,7 @@ func doGetlk(req Req, nodeid uint64, getlkOut *kernel.FuseLkOut) int32 {
 		log.Trace.Printf("Getlk: %+v \n", getlkIn)
 	}
 
-	if se.Opts != nil && se.Opts.Create != nil {
+	if se.Opts != nil && se.Opts.Getlk != nil {
 
 		fi := NewFuseFileInfo()
 		var flock = Flock{}
