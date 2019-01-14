@@ -140,7 +140,7 @@ func main() {
 	se.Debug = false
 	se.FuseConfig.AttrTimeout = 1
 
-	err := mount.Mount(se)
+	err := mount.Mount(se, nil)
 
 	if err != nil {
 		logger.Error.Println(err)

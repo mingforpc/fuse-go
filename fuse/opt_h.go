@@ -763,7 +763,7 @@ type Opt struct {
 	 * ioctl: result to kernel
 	 * res: the errno to fs. About ioctl, please check[http://man7.org/linux/man-pages/man2/ioctl.2.html]
 	 */
-	Ioctl *func(req Req, nodeid uint64, cmd uint32, arg uint64, fi FileInfo, inbuf []byte, outbufsz uint32) (ioctl Ioctl, res int32)
+	Ioctl *func(req Req, nodeid uint64, cmd uint32, arg uint64, fi FileInfo, inbuf []byte, outbufsz uint32) (ioctl *Ioctl, res int32)
 
 	/**
 	 * Poll for IO readiness

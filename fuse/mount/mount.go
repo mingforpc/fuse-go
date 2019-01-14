@@ -28,7 +28,7 @@ func unixgramSocketpair() (l, r *os.File, err error) {
 
 // Mount : Create a FUSE FS on the specified mount point.  The returned
 // mount point is always absolute.
-func Mount(se *fuse.Session) (err error) {
+func Mount(se *fuse.Session, opts []string) (err error) {
 	local, remote, err := unixgramSocketpair()
 	if err != nil {
 		return
@@ -43,7 +43,14 @@ func Mount(se *fuse.Session) (err error) {
 	}
 
 	cmd := []string{bin, se.Mountpoint}
-	opts := []string{"rw", "nosuid", "nodev", "async", "noexec"}
+	// nonempty 支持mount有文件的目录
+	// blkdev mount块设备
+	// fsname={blk} 配合 blkdev 使用，指向设备
+
+	if opts == nil {
+		opts = make([]string, 5)
+	}
+	opts = append(opts, []string{"rw", "nosuid", "nodev", "async", "noexec"}...)
 	cmd = append(cmd, "-o", strings.Join(opts, ","))
 
 	proc, err := os.StartProcess(bin,

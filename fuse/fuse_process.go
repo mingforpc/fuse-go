@@ -1140,7 +1140,7 @@ func doIoctl(req Req, nodeid uint64, ioctlOut *kernel.FuseIoctlOut) int32 {
 
 		fi := NewFuseFileInfo()
 
-		var ioctl Ioctl
+		var ioctl *Ioctl
 		ioctl, res = (*se.Opts.Ioctl)(req, nodeid, ioctlIn.Cmd, ioctlIn.Arg, fi, ioctlIn.InBuf, ioctlIn.OutSize)
 
 		ioctlOut.Result = ioctl.Result
